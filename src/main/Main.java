@@ -16,6 +16,7 @@ import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
+import org.opencv.highgui.Highgui;
 import org.opencv.highgui.VideoCapture;
 import org.opencv.imgproc.Imgproc;
 
@@ -185,7 +186,7 @@ public class Main {
     	Mat frameDiff=new Mat();
     	Core.bitwise_and(absDiff1, absDiff2, frameDiff);
     	Imgproc.threshold(frameDiff, frameDiff, 35, 255, Imgproc.THRESH_BINARY);
-		//Highgui.imwrite("combined/"+frame_count+"output FD.jpg",frameDiff);
+		Highgui.imwrite("test images/"+frame_count+"output FD.jpg",frameDiff);
     	Imgproc.cvtColor(frameDiff, frameDiff, Imgproc.COLOR_BGR2GRAY);
     	
     	//now that be have the mat of movement, get each unique blob of movement in it.

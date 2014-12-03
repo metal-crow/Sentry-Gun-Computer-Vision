@@ -11,6 +11,7 @@ import org.javatuples.Pair;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
+import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
 
 public class BlobDetection {
@@ -38,7 +39,7 @@ public class BlobDetection {
 			throw new Exception("Invalid priority identifier.");
 		}
 		//Is a SimpleBlobDetector http://docs.opencv.org/modules/features2d/doc/common_interfaces_of_feature_detectors.html#simpleblobdetector better for this?
-    	int blobColor=1;//note:this will cause errors for >254 blobs in an image
+    	int blobColor=100;//note:this will cause errors for >254 blobs in an image
         ExecutorService executor = Executors.newCachedThreadPool();
 		ArrayList<Future<Pair<int[],Integer>>> tasks = new ArrayList<Future<Pair<int[],Integer>>>();
 
@@ -47,12 +48,13 @@ public class BlobDetection {
     			//the top left corner of a blob
     			if(img.get(y, x)[0]==255){
     				//flood fill the blob
-    				Imgproc.floodFill(img, new Mat(), new Point(y,x), new Scalar(blobColor));
-                    blobColor++;
+    				Imgproc.floodFill(img, new Mat(), new Point(x,y), new Scalar(blobColor));
+                    Highgui.imwrite("test images/"+blobColor+"flood fill.png", img);
 
     				//get the blob's center of mass and its priority in a thread.
     				Callable<Pair<int[],Integer>> thread=new MassDetectionandObjectPriority(img, blobColor, identification);
     				tasks.add(executor.submit(thread));
+                    blobColor++;
     			}
     		}
     	}

@@ -1,6 +1,7 @@
 package main;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -10,6 +11,7 @@ import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
+import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
 
 /**
@@ -32,7 +34,7 @@ public class MassDetectionandObjectPriority implements Callable<Pair<int[],Integ
 		//get a bounding rectangle around the blob
 		//is findCountours really the fastest and best method for this?
 		List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
-		Imgproc.findContours(img, contours, new Mat(), Imgproc.RETR_EXTERNAL , Imgproc.CHAIN_APPROX_SIMPLE);
+		Imgproc.findContours(img.clone(), contours, new Mat(), Imgproc.RETR_EXTERNAL , Imgproc.CHAIN_APPROX_SIMPLE);
 		Rect box=Imgproc.boundingRect(contours.get(0));
 		
 		//find the center of mass in this area
@@ -40,29 +42,39 @@ public class MassDetectionandObjectPriority implements Callable<Pair<int[],Integ
 		//When we reach 1 px width and height, we now have x,y coordinate for center of mass.
 		int[] rect={box.x,box.y,box.x+box.width,box.y+box.height};
 		
+		int i=0;
 		while(blobimg.width()>1 && blobimg.height()>1){
+			Highgui.imwrite("test images/"+color+" "+i+".png", blobimg);
+			System.out.println(color+" "+Arrays.toString(rect));
+			i++;
+			
 			//split image and see which corner has more blob
-			int totalpixels=blobimg.width()*blobimg.height();
-			int countLT = totalpixels-Core.countNonZero(blobimg.submat(0, blobimg.rows()/2, 0, blobimg.cols()/2));
-			int countRT = totalpixels-Core.countNonZero(blobimg.submat(0, blobimg.rows()/2, blobimg.cols()/2, blobimg.cols()));
-			int countLB = totalpixels-Core.countNonZero(blobimg.submat(blobimg.rows()/2, blobimg.rows(), 0, blobimg.cols()/2));
-			int countRB = totalpixels-Core.countNonZero(blobimg.submat(blobimg.rows()/2, blobimg.rows(), blobimg.cols()/2, blobimg.cols()));
+			int countLT = Core.countNonZero(blobimg.submat(rect[0], (rect[0]+rect[2])/2, rect[1], (rect[1]+rect[3])/2));
+			int countRT = Core.countNonZero(blobimg.submat((rect[0]+rect[2])/2, rect[2], rect[1], (rect[1]+rect[3])/2));
+			int countLB = Core.countNonZero(blobimg.submat(rect[0], (rect[0]+rect[2])/2, (rect[1]+rect[3])/2, rect[3]));
+			int countRB = Core.countNonZero(blobimg.submat((rect[0]+rect[2])/2, rect[2], (rect[1]+rect[3])/2, rect[3]));
+			
+			System.out.println(countLT+" "+countRT+" "+countLB+" "+countRB);
 			
 			if(countLT>countRT && countLT>countLB && countLT>countRB){
+				System.out.println("lt");
 				rect=new int[]{rect[0], rect[1], (rect[0]+rect[2])/2, (rect[1]+rect[3])/2};
-				blobimg=new Mat(blobimg, new Rect(0, 0, blobimg.cols()/2, blobimg.rows()/2));
+				blobimg=new Mat(blobimg, new Rect(//TODO));
 			}
 			else if(countRT>countLT && countRT>countLB && countRT>countRB){
+				System.out.println("rt");
 				rect=new int[]{(rect[0]+rect[2])/2, rect[1], rect[2], (rect[1]+rect[3])/2};
-				blobimg=new Mat(blobimg, new Rect(blobimg.cols()/2, 0, blobimg.cols()/2, blobimg.rows()/2));
+				blobimg=new Mat(blobimg, new Rect(//TODO));
 			}
 			else if(countLB>countLT && countLB>countRT && countLB>countRB){
+				System.out.println("lb");
 				rect=new int[]{rect[0], (rect[1]+rect[3])/2, (rect[0]+rect[2])/2, rect[3]};
-				blobimg=new Mat(blobimg, new Rect(0, blobimg.rows()/2, blobimg.cols()/2, blobimg.rows()/2));
+				blobimg=new Mat(blobimg, new Rect(//TODO));
 			}
 			else{
+				System.out.println("rb");
 				rect=new int[]{(rect[0]+rect[2])/2, (rect[1]+rect[3])/2, rect[2], rect[3]};
-				blobimg=new Mat(blobimg, new Rect(blobimg.cols()/2, blobimg.rows()/2, blobimg.cols()/2, blobimg.rows()/2));
+				blobimg=new Mat(blobimg, new Rect(//TODO));
 			}
 		}
 		
