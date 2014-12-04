@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src">
+		<attributes>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="C:/Users/Thinkpad1_SwatHelm0/workspace/.external librarys/RXTX for Java 2.2 x64"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/OpenCV"/>
+	<classpathentry kind="lib" path="C:/Users/Thinkpad1_SwatHelm0/workspace/.external librarys/RXTX for Java 2.2 x64/RXTXcomm.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Thinkpad1_SwatHelm0/workspace/.external librarys/javatuples-1.2/dist/javatuples-1.2.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
