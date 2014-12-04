@@ -38,47 +38,34 @@ public class MassDetectionandObjectPriority implements Callable<Pair<int[],Integ
 		Rect box=Imgproc.boundingRect(contours.get(0));
 		
 		//find the center of mass in this area
-		//do a binary search on the image in both dimensions. Split the image into 4 parts, find the side with the larger # of blob pixels, resize the image to that segment, and repeat.
-		//When we reach 1 px width and height, we now have x,y coordinate for center of mass.
+		//do a binary search on the image in the both dimension.
+		//Split the image into 4 parts, find the corner with the larger # of blob pixels, store that area in rect, and repeat.
+		//When we reach 1 px width and height of the rect, we now have x,y coordinate for center of mass.
 		int[] rect={box.x,box.y,box.x+box.width,box.y+box.height};
 		
-		int i=0;
-		while(blobimg.width()>1 && blobimg.height()>1){
-			Highgui.imwrite("test images/"+color+" "+i+".png", blobimg);
-			System.out.println(color+" "+Arrays.toString(rect));
-			i++;
-			
+		while(rect[3]-rect[1]>1 && rect[2]-rect[0]>1){			
 			//split image and see which corner has more blob
-			int countLT = Core.countNonZero(blobimg.submat(rect[0], (rect[0]+rect[2])/2, rect[1], (rect[1]+rect[3])/2));
-			int countRT = Core.countNonZero(blobimg.submat((rect[0]+rect[2])/2, rect[2], rect[1], (rect[1]+rect[3])/2));
-			int countLB = Core.countNonZero(blobimg.submat(rect[0], (rect[0]+rect[2])/2, (rect[1]+rect[3])/2, rect[3]));
-			int countRB = Core.countNonZero(blobimg.submat((rect[0]+rect[2])/2, rect[2], (rect[1]+rect[3])/2, rect[3]));
-			
-			System.out.println(countLT+" "+countRT+" "+countLB+" "+countRB);
-			
+			int countLT = Core.countNonZero(blobimg.submat(rect[1], (rect[1]+rect[3])/2, rect[0], (rect[0]+rect[2])/2));
+			int countRT = Core.countNonZero(blobimg.submat(rect[1], (rect[1]+rect[3])/2, (rect[0]+rect[2])/2, rect[2]));
+			int countLB = Core.countNonZero(blobimg.submat((rect[1]+rect[3])/2, rect[3], rect[0], (rect[0]+rect[2])/2));
+			int countRB = Core.countNonZero(blobimg.submat((rect[1]+rect[3])/2, rect[3], (rect[0]+rect[2])/2, rect[2]));
+						
 			if(countLT>countRT && countLT>countLB && countLT>countRB){
-				System.out.println("lt");
 				rect=new int[]{rect[0], rect[1], (rect[0]+rect[2])/2, (rect[1]+rect[3])/2};
-				blobimg=new Mat(blobimg, new Rect(//TODO));
 			}
 			else if(countRT>countLT && countRT>countLB && countRT>countRB){
-				System.out.println("rt");
 				rect=new int[]{(rect[0]+rect[2])/2, rect[1], rect[2], (rect[1]+rect[3])/2};
-				blobimg=new Mat(blobimg, new Rect(//TODO));
 			}
 			else if(countLB>countLT && countLB>countRT && countLB>countRB){
-				System.out.println("lb");
 				rect=new int[]{rect[0], (rect[1]+rect[3])/2, (rect[0]+rect[2])/2, rect[3]};
-				blobimg=new Mat(blobimg, new Rect(//TODO));
 			}
+			//all corners being equal, this will bias towards the bottom right
 			else{
-				System.out.println("rb");
 				rect=new int[]{(rect[0]+rect[2])/2, (rect[1]+rect[3])/2, rect[2], rect[3]};
-				blobimg=new Mat(blobimg, new Rect(//TODO));
 			}
 		}
 		
-		int[] point={rect[0]+1,rect[1]+1};
+		int[] point={rect[0],rect[1]};
 		
 		//TODO find priority of blob
 		
@@ -102,5 +89,17 @@ public class MassDetectionandObjectPriority implements Callable<Pair<int[],Integ
 	@Override
 	public Pair<int[],Integer> call() throws Exception {
 		return BlobInformation();
+	}
+	
+	public static void main(String[] args) throws Exception {
+        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+        
+        Mat img=Highgui.imread("test images/elongated blob.png");
+    	Imgproc.threshold(img, img, 35, 255, Imgproc.THRESH_BINARY);
+    	Imgproc.cvtColor(img, img, Imgproc.COLOR_BGR2GRAY);
+    	
+    	MassDetectionandObjectPriority a= new MassDetectionandObjectPriority(img, 255, 0);
+    	Pair<int[],Integer> r=a.call();
+    	System.out.println(Arrays.toString(r.getValue0()));
 	}
 }
