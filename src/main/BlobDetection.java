@@ -49,7 +49,6 @@ public class BlobDetection {
     			if(img.get(y, x)[0]==255){
     				//flood fill the blob
     				Imgproc.floodFill(img, new Mat(), new Point(x,y), new Scalar(blobColor));
-                    Highgui.imwrite("test images/"+blobColor+"flood fill.png", img);
 
     				//get the blob's center of mass and its priority in a thread.
     				Callable<Pair<int[],Integer>> thread=new MassDetectionandObjectPriority(img, blobColor, identification);

@@ -133,7 +133,7 @@ public class Main {
 	    				movementtarget=t;
 	    			}
 	    		}
-	    		System.out.println(Arrays.toString(movementtarget.getValue0()));
+	    		System.out.println("Shoot coord: "+Arrays.toString(movementtarget.getValue0()));
 	    		
     			//set the coordinate as the point to be shot
 	        	try {
