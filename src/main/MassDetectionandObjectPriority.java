@@ -7,8 +7,10 @@ import java.util.concurrent.Callable;
 
 import org.javatuples.Pair;
 import org.opencv.core.Core;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
+import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.highgui.Highgui;
@@ -79,7 +81,11 @@ public class MassDetectionandObjectPriority implements Callable<Pair<int[],Integ
             System.out.println(density);
 
             //check circularity of blob (more likely to be laser point)
-            double circularity=4*Math.PI*blobArea/Math.pow(contours.get(0).rows(),2);
+            //convert contour to matofpoint2f for use in finding perimeter
+            MatOfPoint2f peremeter = new MatOfPoint2f();
+            contours.get(0).convertTo(peremeter, CvType.CV_32FC2);
+            
+            double circularity=4*Math.PI*blobArea/Math.pow(Imgproc.arcLength(peremeter,true),2);
             System.out.println(circularity);
 		}
 		else if(identificationType==BlobDetection.PERSON_IDENTIFICATION){
@@ -109,7 +115,7 @@ public class MassDetectionandObjectPriority implements Callable<Pair<int[],Integ
 	public static void main(String[] args) throws Exception {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         
-        Mat img=Highgui.imread("testing/movement blob.png");
+        Mat img=Highgui.imread("testing/circle.png");
     	Imgproc.threshold(img, img, 35, 255, Imgproc.THRESH_BINARY);
     	Imgproc.cvtColor(img, img, Imgproc.COLOR_BGR2GRAY);
     	
