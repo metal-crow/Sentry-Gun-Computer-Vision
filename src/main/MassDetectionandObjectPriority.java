@@ -79,7 +79,7 @@ public class MassDetectionandObjectPriority implements Callable<Pair<int[],Integ
             System.out.println(density);
 
             //check circularity of blob (more likely to be laser point)
-            double circularity=Math.pow(contours.get(0).rows(),2)/4*Math.PI*blobArea;
+            double circularity=4*Math.PI*blobArea/Math.pow(contours.get(0).rows(),2);
             System.out.println(circularity);
 		}
 		else if(identificationType==BlobDetection.PERSON_IDENTIFICATION){
@@ -109,7 +109,7 @@ public class MassDetectionandObjectPriority implements Callable<Pair<int[],Integ
 	public static void main(String[] args) throws Exception {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         
-        Mat img=Highgui.imread("testing/circle blob.png");
+        Mat img=Highgui.imread("testing/movement blob.png");
     	Imgproc.threshold(img, img, 35, 255, Imgproc.THRESH_BINARY);
     	Imgproc.cvtColor(img, img, Imgproc.COLOR_BGR2GRAY);
     	
