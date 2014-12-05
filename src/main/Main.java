@@ -51,7 +51,7 @@ public class Main {
     	curFrame=new Mat();
     	nextFrame=new Mat();
     	
-        String filename="test images/output.avi";
+        String filename="testing/moving ball.avi";
         VideoCapture video = new VideoCapture(filename);
     	
         //VideoCapture video = new VideoCapture(0);
@@ -186,7 +186,7 @@ public class Main {
     	Mat frameDiff=new Mat();
     	Core.bitwise_and(absDiff1, absDiff2, frameDiff);
     	Imgproc.threshold(frameDiff, frameDiff, 35, 255, Imgproc.THRESH_BINARY);
-		Highgui.imwrite("test images/"+frame_count+"output FD.jpg",frameDiff);
+		Highgui.imwrite("testing/movement/"+frame_count+"output FD.jpg",frameDiff);
     	Imgproc.cvtColor(frameDiff, frameDiff, Imgproc.COLOR_BGR2GRAY);
     	
     	//now that be have the mat of movement, get each unique blob of movement in it.

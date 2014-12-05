@@ -11,7 +11,6 @@ import org.javatuples.Pair;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
-import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
 
 public class BlobDetection {

@@ -35,13 +35,13 @@ public class MassDetectionandObjectPriority implements Callable<Pair<int[],Integ
 		//is findCountours really the fastest and best method for this?
 		List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
 		Imgproc.findContours(img.clone(), contours, new Mat(), Imgproc.RETR_EXTERNAL , Imgproc.CHAIN_APPROX_SIMPLE);
-		Rect box=Imgproc.boundingRect(contours.get(0));
+		Rect boundingbox=Imgproc.boundingRect(contours.get(0));//their should always be only one (flood fill from BlobDetection)
 		
 		//find the center of mass in this area
 		//do a binary search on the image in the both dimension.
 		//Split the image into 4 parts, find the corner with the larger # of blob pixels, store that area in rect, and repeat.
 		//When we reach 1 px width and height of the rect, we now have x,y coordinate for center of mass.
-		int[] rect={box.x,box.y,box.x+box.width,box.y+box.height};
+		int[] rect={boundingbox.x,boundingbox.y,boundingbox.x+boundingbox.width,boundingbox.y+boundingbox.height};
 		
 		while(rect[3]-rect[1]>1 && rect[2]-rect[0]>1){			
 			//split image and see which corner has more blob
@@ -68,9 +68,24 @@ public class MassDetectionandObjectPriority implements Callable<Pair<int[],Integ
 		int[] point={rect[0],rect[1]};
 		
 		//TODO find priority of blob
-		
-		//for person identification, a detected face makes it priority 10. Otherwise, check for other features.
-		//do in separate file
+		if(identificationType==BlobDetection.BASIC_IDENTIFICATION){
+		    
+		}
+		else if(identificationType==BlobDetection.LASER_IDENTIFICATION){
+		    int blobArea=Core.countNonZero(blobimg.submat(boundingbox.y, boundingbox.y+boundingbox.height, boundingbox.x, boundingbox.x+boundingbox.width));
+		    
+	        //density of the area (# of blob pixels/area of rectangle)
+            double density=(double)blobArea/(double)(boundingbox.width*boundingbox.height);
+            System.out.println(density);
+
+            //check circularity of blob (more likely to be laser point)
+            double circularity=Math.pow(contours.get(0).rows(),2)/4*Math.PI*blobArea;
+            System.out.println(circularity);
+		}
+		else if(identificationType==BlobDetection.PERSON_IDENTIFICATION){
+	        //for person identification, a detected face makes it priority 10. Otherwise, check for other features.
+	        //do in separate file
+		}
 
 		return Pair.with(point, 10);
 	}
@@ -94,11 +109,11 @@ public class MassDetectionandObjectPriority implements Callable<Pair<int[],Integ
 	public static void main(String[] args) throws Exception {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         
-        Mat img=Highgui.imread("test images/elongated blob.png");
+        Mat img=Highgui.imread("testing/circle blob.png");
     	Imgproc.threshold(img, img, 35, 255, Imgproc.THRESH_BINARY);
     	Imgproc.cvtColor(img, img, Imgproc.COLOR_BGR2GRAY);
     	
-    	MassDetectionandObjectPriority a= new MassDetectionandObjectPriority(img, 255, 0);
+    	MassDetectionandObjectPriority a= new MassDetectionandObjectPriority(img, 255, 1);
     	Pair<int[],Integer> r=a.call();
     	System.out.println(Arrays.toString(r.getValue0()));
 	}
