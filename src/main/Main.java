@@ -144,6 +144,10 @@ public class Main {
 	        	Core.circle(drawImg, new Point(movementtarget.getValue0()[0],movementtarget.getValue0()[1]), 4, new Scalar(0,0,255),-1);//DEBUGGING
     		}
 	        
+    		//if we have not found any movement or laser pointer, perform at rest person identification
+    		if(!foundTarget){
+    			
+    		}
     		
     		//if we have found a target, we have already sent its coordinates to the arduino. now shoot
     		if(foundTarget){

@@ -68,17 +68,16 @@ public class MassDetectionandObjectPriority implements Callable<Pair<int[],Integ
 		}
 		
 		int[] point={rect[0],rect[1]};
+		int priority=0;//rank from 0-100
 		
-		//TODO find priority of blob
 		if(identificationType==BlobDetection.BASIC_IDENTIFICATION){
-		    
+		    //calculate priority based on size of blob (with respect to frame size)
 		}
 		else if(identificationType==BlobDetection.LASER_IDENTIFICATION){
 		    int blobArea=Core.countNonZero(blobimg.submat(boundingbox.y, boundingbox.y+boundingbox.height, boundingbox.x, boundingbox.x+boundingbox.width));
 		    
 	        //density of the area (# of blob pixels/area of rectangle)
             double density=(double)blobArea/(double)(boundingbox.width*boundingbox.height);
-            System.out.println(density);
 
             //check circularity of blob (more likely to be laser point)
             //convert contour to matofpoint2f for use in finding perimeter
@@ -86,14 +85,16 @@ public class MassDetectionandObjectPriority implements Callable<Pair<int[],Integ
             contours.get(0).convertTo(peremeter, CvType.CV_32FC2);
             
             double circularity=4*Math.PI*blobArea/Math.pow(Imgproc.arcLength(peremeter,true),2);
-            System.out.println(circularity);
+            
+            //convert both to a ranking mechanism for the likelihood this is a laser point
+            priority=(int) ((density*circularity)*100);
 		}
 		else if(identificationType==BlobDetection.PERSON_IDENTIFICATION){
-	        //for person identification, a detected face makes it priority 10. Otherwise, check for other features.
+	        //for person identification, a detected face makes it a top priority. Otherwise, check for other features.
 	        //do in separate file
 		}
 
-		return Pair.with(point, 10);
+		return Pair.with(point, priority);
 	}
 	
 	/**
