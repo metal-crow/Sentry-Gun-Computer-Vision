@@ -79,6 +79,7 @@ public class MassDetectionandObjectPriority implements Callable<Pair<int[],Integ
             System.out.println(density);
 
             //check circularity of blob (more likely to be laser point)
+            //TODO contours is generated as CHAIN_APPROX_SIMPLE, and as such has an inaccurate number for this.
             double circularity=4*Math.PI*blobArea/Math.pow(contours.get(0).rows(),2);
             System.out.println(circularity);
 		}
