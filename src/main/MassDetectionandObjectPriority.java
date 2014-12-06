@@ -36,7 +36,7 @@ public class MassDetectionandObjectPriority implements Callable<Pair<int[],Integ
 		//get a bounding rectangle around the blob
 		//is findCountours really the fastest and best method for this?
 		List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
-		Imgproc.findContours(img.clone(), contours, new Mat(), Imgproc.RETR_EXTERNAL , Imgproc.CHAIN_APPROX_NONE);
+		Imgproc.findContours(blobimg.clone(), contours, new Mat(), Imgproc.RETR_EXTERNAL , Imgproc.CHAIN_APPROX_NONE);
 		Rect boundingbox=Imgproc.boundingRect(contours.get(0));//there should always be only one (flood fill from BlobDetection)
 		
 		//find the center of mass in this area
@@ -72,6 +72,7 @@ public class MassDetectionandObjectPriority implements Callable<Pair<int[],Integ
 		
 		if(identificationType==BlobDetection.BASIC_IDENTIFICATION){
 		    //calculate priority based on size of blob (with respect to frame size)
+		    priority=((boundingbox.height*boundingbox.width)/Main.frameArea)*100;
 		}
 		else if(identificationType==BlobDetection.LASER_IDENTIFICATION){
 		    int blobArea=Core.countNonZero(blobimg.submat(boundingbox.y, boundingbox.y+boundingbox.height, boundingbox.x, boundingbox.x+boundingbox.width));

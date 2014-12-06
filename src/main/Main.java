@@ -53,9 +53,9 @@ public class Main {
     	nextFrame=new Mat();
     	
         String filename="testing/green laser.avi";
-        VideoCapture video = new VideoCapture(filename);
+        //VideoCapture video = new VideoCapture(filename);
     	
-        //VideoCapture video = new VideoCapture(0);
+        VideoCapture video = new VideoCapture(0);
         video.read(curFrame);
     	video.read(nextFrame);
     	frameArea=nextFrame.rows()*nextFrame.cols();
@@ -133,6 +133,9 @@ public class Main {
 	    		//get the highest priority target (most likely to be a person)
 	    		Pair<int[], Integer> movementtarget=targets.get(0);
 	    		for(Pair<int[], Integer> t:targets){
+	    		    
+                    //Core.circle(drawImg, new Point(t.getValue0()[0],t.getValue0()[1]), 4, new Scalar(0,0,255),-1);//DEBUGGING
+
 	    			if(t.getValue1()>movementtarget.getValue1()){
 	    				movementtarget=t;
 	    			}
@@ -194,9 +197,9 @@ public class Main {
     	Core.absdiff(curFrame, nextFrame, absDiff2);
     	Mat frameDiff=new Mat();
     	Core.bitwise_and(absDiff1, absDiff2, frameDiff);
-    	Imgproc.threshold(frameDiff, frameDiff, 35, 255, Imgproc.THRESH_BINARY);
         Imgproc.cvtColor(frameDiff, frameDiff, Imgproc.COLOR_BGR2GRAY);
-		//Highgui.imwrite("testing/movement/"+frame_count+"output FD.jpg",frameDiff);
+    	Imgproc.threshold(frameDiff, frameDiff, 35, 255, Imgproc.THRESH_BINARY);
+		//Highgui.imwrite("testing/movement/"+frame_count+"output.jpg",frameDiff);
     	
     	//now that be have the mat of movement, get each unique blob of movement in it.
     	return BlobDetection.findSolidBlobs(frameDiff,BlobDetection.BASIC_IDENTIFICATION);
