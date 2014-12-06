@@ -31,6 +31,7 @@ public class Main {
 	private static Mat curFrame;
 	private static Mat nextFrame;
 	private static int frame_count=0;
+	public static int frameArea;
 
 	//Green min hue 42.5,max hue 70
 	//Opencv is 0-180 hue range, so if you change this remember
@@ -57,6 +58,7 @@ public class Main {
         //VideoCapture video = new VideoCapture(0);
         video.read(curFrame);
     	video.read(nextFrame);
+    	frameArea=nextFrame.rows()*nextFrame.cols();
     	
 		//frame to view the video in real time
 		JFrame f = new JFrame();
@@ -146,7 +148,7 @@ public class Main {
 	        	Core.circle(drawImg, new Point(movementtarget.getValue0()[0],movementtarget.getValue0()[1]), 4, new Scalar(0,0,255),-1);//DEBUGGING
     		}
 	        
-    		//if we have not found any movement or laser pointer, perform at rest person identification
+    		//TODO if we have not found any movement or laser pointer, perform at rest person identification
     		if(!foundTarget){
     			
     		}
