@@ -51,12 +51,12 @@ public class ArduinoInteraction {
     	int screenXPos=(point[0]*cameraFOV)/imgWidth;
     	//since screen is flipped, reverse
     	screenXPos=Math.abs(screenXPos-cameraFOV);
-		System.out.println("servo X"+screenXPos);
+		//System.out.println("servo X"+screenXPos);
 		arduinoOut.write(new Integer(screenXPos).byteValue());
 		
     	int screenYPos=(point[1]*cameraFOV)/imgHeight;
     	screenYPos=Math.abs(screenYPos-cameraFOV);
-		System.out.println("servo Y"+screenYPos);
+		//System.out.println("servo Y"+screenYPos);
 		arduinoOut.write(new Integer(screenYPos).byteValue());
     }
     

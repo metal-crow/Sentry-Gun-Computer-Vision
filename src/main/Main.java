@@ -51,7 +51,7 @@ public class Main {
     	curFrame=new Mat();
     	nextFrame=new Mat();
     	
-        String filename="testing/moving ball.avi";
+        String filename="testing/green laser.avi";
         VideoCapture video = new VideoCapture(filename);
     	
         //VideoCapture video = new VideoCapture(0);
@@ -94,10 +94,11 @@ public class Main {
 			}
 	        
 	        //pick the point with the highest priority (most likely to be laser point)
-			Pair<int[], Integer> lasertarget=Pair.with(new int[]{}, 0);
+			Pair<int[], Integer> lasertarget=Pair.with(new int[]{}, -1);
     		for(Pair<int[], Integer> t:laser_points){
     			if(t.getValue1()>lasertarget.getValue1()){
     				lasertarget=t;
+    				foundTarget=true;
     			}
     		}
 	        
@@ -108,6 +109,7 @@ public class Main {
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
+                System.out.println("Laser coord: "+Arrays.toString(lasertarget.getValue0()));
 	        	Core.circle(drawImg, new Point(lasertarget.getValue0()[0],lasertarget.getValue0()[1]), 3, new Scalar(255,0,0),-1);//DEBUGGING
 	        }
 	        
@@ -133,7 +135,7 @@ public class Main {
 	    				movementtarget=t;
 	    			}
 	    		}
-	    		System.out.println("Shoot coord: "+Arrays.toString(movementtarget.getValue0()));
+	    		System.out.println("Movement coord: "+Arrays.toString(movementtarget.getValue0()));
 	    		
     			//set the coordinate as the point to be shot
 	        	try {
@@ -154,11 +156,12 @@ public class Main {
     			arduinoOut.fire();
     		}
     		
-	        System.out.println("Time to find movement (millisec)"+frame_count+" : "+(System.currentTimeMillis()-time));
+	        System.out.println("Time for frame "+frame_count+" (millisec) : "+(System.currentTimeMillis()-time));
 	        
 	        //DEBUG WRITING FOR TESTING
 			try {
 				panel.setImage(drawImg);
+		        //Highgui.imwrite("testing/test/"+frame_count+"output.jpg",drawImg);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -190,11 +193,11 @@ public class Main {
     	Mat frameDiff=new Mat();
     	Core.bitwise_and(absDiff1, absDiff2, frameDiff);
     	Imgproc.threshold(frameDiff, frameDiff, 35, 255, Imgproc.THRESH_BINARY);
-		Highgui.imwrite("testing/movement/"+frame_count+"output FD.jpg",frameDiff);
-    	Imgproc.cvtColor(frameDiff, frameDiff, Imgproc.COLOR_BGR2GRAY);
+        Imgproc.cvtColor(frameDiff, frameDiff, Imgproc.COLOR_BGR2GRAY);
+		//Highgui.imwrite("testing/movement/"+frame_count+"output FD.jpg",frameDiff);
     	
     	//now that be have the mat of movement, get each unique blob of movement in it.
-    	return BlobDetection.findBlobs(frameDiff,BlobDetection.BASIC_IDENTIFICATION);
+    	return BlobDetection.findSolidBlobs(frameDiff,BlobDetection.BASIC_IDENTIFICATION);
     }
     
     /** find green dot in image */
@@ -203,11 +206,11 @@ public class Main {
     	Mat hsv_channel = new Mat();
         Imgproc.cvtColor(nextFrame,hsv_channel, Imgproc.COLOR_BGR2HSV);
         //Hue,Saturation,Brightness
-        Core.inRange(hsv_channel,new Scalar(laser_color_range[0],150,200),new Scalar(laser_color_range[1],255,255),hsv_channel);
+        Core.inRange(hsv_channel,new Scalar(laser_color_range[0],75,180),new Scalar(laser_color_range[1],255,255),hsv_channel);
         ArrayList<Mat> laser_binary_channels = new ArrayList<Mat>(3);
         Core.split(hsv_channel, laser_binary_channels);
-        //Highgui.imwrite("test images/"+frame_count+"output LZ.jpg",hsv_channel);
+        //Highgui.imwrite("testing/laser/"+frame_count+"output LZ.jpg",hsv_channel);
         
-        return BlobDetection.findBlobs(laser_binary_channels.get(laser_binary_channels.size()-1),BlobDetection.LASER_IDENTIFICATION);
+        return BlobDetection.findSolidBlobs(laser_binary_channels.get(laser_binary_channels.size()-1),BlobDetection.LASER_IDENTIFICATION);
     }
 }

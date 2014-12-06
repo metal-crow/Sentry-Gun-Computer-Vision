@@ -8,6 +8,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.javatuples.Pair;
+import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
@@ -20,9 +21,11 @@ public class BlobDetection {
 		BASIC_IDENTIFICATION=0,
 		LASER_IDENTIFICATION=1,
 		PERSON_IDENTIFICATION=2;
+	
+	private static final int minBlobAreaPX=100;
 
 	/**
-	 * Find blobs in a binary image. White is assumed to be the blobs of interest
+	 * Find solid color blobs in a binary image. White is assumed to be the blobs of interest
 	 * @param img a binary image. This is manipulated by this method.
 	 * @param identification The type of blob this is, and how to classify its priority.
 	 * <ul>
@@ -33,7 +36,7 @@ public class BlobDetection {
 	 * @return an array containing the center of each blob, and the blob's priority
 	 * @throws Exception if the supplied priority identification type is invalid
 	 */
-	public static ArrayList<Pair<int[], Integer>> findBlobs(Mat img, int identification) throws Exception{
+	public static ArrayList<Pair<int[], Integer>> findSolidBlobs(Mat img, int identification) throws Exception{
 		if(identification<0 || identification>2){
 			throw new Exception("Invalid priority identifier.");
 		}
@@ -45,14 +48,23 @@ public class BlobDetection {
     	for(int y=0;y<img.rows();y++){
     		for(int x=0;x<img.cols();x++){
     			//the top left corner of a blob
-    			if(img.get(y, x)[0]==255){
+    			if(img.get(y, x)[0]==255){    		    
     				//flood fill the blob
     				Imgproc.floodFill(img, new Mat(), new Point(x,y), new Scalar(blobColor));
-
-    				//get the blob's center of mass and its priority in a thread.
-    				Callable<Pair<int[],Integer>> thread=new MassDetectionandObjectPriority(img, blobColor, identification);
-    				tasks.add(executor.submit(thread));
-                    blobColor++;
+    				
+                    //if blob had enough pixels to be a valid blob (not noise, artifacts, save threads)
+    				//TODO is there a way to get this from flood fill? Would be a lot faster than this.
+    		        Mat singleBlob=new Mat();
+    		        Core.inRange(img, new Scalar(blobColor), new Scalar(blobColor), singleBlob);
+    		        int areaOfBlob=Core.countNonZero(singleBlob);
+    		        singleBlob.release();
+    		        
+    		        if(areaOfBlob>=minBlobAreaPX){
+        				//get the blob's center of mass and its priority in a thread.
+        				Callable<Pair<int[],Integer>> thread=new MassDetectionandObjectPriority(img, blobColor, identification);
+        				tasks.add(executor.submit(thread));
+                        blobColor++;
+    		        }
     			}
     		}
     	}
