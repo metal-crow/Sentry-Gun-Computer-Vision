@@ -68,11 +68,12 @@ public class MassDetectionandObjectPriority implements Callable<Pair<int[],Integ
 		}
 		
 		int[] point={rect[0],rect[1]};
-		int priority=0;//rank from 0-100
+		int priority=0;
 		
 		if(identificationType==BlobDetection.BASIC_IDENTIFICATION){
-		    //calculate priority based on size of blob (with respect to frame size)
-		    priority=((boundingbox.height*boundingbox.width)/Main.frameArea)*100;
+		    //calculate priority based on size of blob
+	        int blobArea=Core.countNonZero(blobimg.submat(boundingbox.y, boundingbox.y+boundingbox.height, boundingbox.x, boundingbox.x+boundingbox.width));
+		    priority=blobArea;
 		}
 		else if(identificationType==BlobDetection.LASER_IDENTIFICATION){
 		    int blobArea=Core.countNonZero(blobimg.submat(boundingbox.y, boundingbox.y+boundingbox.height, boundingbox.x, boundingbox.x+boundingbox.width));

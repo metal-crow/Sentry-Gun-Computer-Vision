@@ -31,7 +31,6 @@ public class Main {
 	private static Mat curFrame;
 	private static Mat nextFrame;
 	private static int frame_count=0;
-	public static int frameArea;
 
 	//Green min hue 42.5,max hue 70
 	//Opencv is 0-180 hue range, so if you change this remember
@@ -58,7 +57,6 @@ public class Main {
         VideoCapture video = new VideoCapture(0);
         video.read(curFrame);
     	video.read(nextFrame);
-    	frameArea=nextFrame.rows()*nextFrame.cols();
     	
 		//frame to view the video in real time
 		JFrame f = new JFrame();
@@ -199,6 +197,7 @@ public class Main {
     	Core.bitwise_and(absDiff1, absDiff2, frameDiff);
         Imgproc.cvtColor(frameDiff, frameDiff, Imgproc.COLOR_BGR2GRAY);
     	Imgproc.threshold(frameDiff, frameDiff, 35, 255, Imgproc.THRESH_BINARY);
+    	
 		//Highgui.imwrite("testing/movement/"+frame_count+"output.jpg",frameDiff);
     	
     	//now that be have the mat of movement, get each unique blob of movement in it.
@@ -214,6 +213,7 @@ public class Main {
         Core.inRange(hsv_channel,new Scalar(laser_color_range[0],75,180),new Scalar(laser_color_range[1],255,255),hsv_channel);
         ArrayList<Mat> laser_binary_channels = new ArrayList<Mat>(3);
         Core.split(hsv_channel, laser_binary_channels);
+        
         //Highgui.imwrite("testing/laser/"+frame_count+"output LZ.jpg",hsv_channel);
         
         return BlobDetection.findSolidBlobs(laser_binary_channels.get(laser_binary_channels.size()-1),BlobDetection.LASER_IDENTIFICATION);
