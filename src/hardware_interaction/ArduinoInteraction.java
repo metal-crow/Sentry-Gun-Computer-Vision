@@ -43,7 +43,7 @@ public class ArduinoInteraction {
      */
     public void arduinoScreenPositiontoAngle(int[] point, int imgWidth, int imgHeight) throws IOException{
         //write that this command is to move the servos
-        arduinoOut.write(0);
+        arduinoOut.write(1);
         
     	//I get distortion at screen edges. This is dependent on fov of camera. Need this to recalculate.
     	//convert the screen positions to an angle from 0 to cameraFOV for correct angle
@@ -62,9 +62,10 @@ public class ArduinoInteraction {
     
     /**
      * Trigger the gun trigger
+     * @throws IOException 
      */
-    public void fire(){
-    	
+    public void fire() throws IOException{
+    	arduinoOut.write(2);
     }
     
     public void flush(){

@@ -156,7 +156,12 @@ public class Main {
     		
     		//if we have found a target, we have already sent its coordinates to the arduino. now shoot
     		if(foundTarget){
-    			arduinoOut.fire();
+    		    try{
+    		        arduinoOut.fire();
+    		    }catch(IOException e){
+    		        System.err.println("error firing");
+    		        e.printStackTrace();
+    		    }
     		}
     		
 	        System.out.println("Time for frame "+frame_count+" (millisec) : "+(System.currentTimeMillis()-time));

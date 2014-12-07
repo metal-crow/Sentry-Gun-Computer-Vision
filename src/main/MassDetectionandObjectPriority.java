@@ -16,6 +16,8 @@ import org.opencv.core.Scalar;
 import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
 
+import person_identification.DetectPerson;
+
 /**
  * Given an image containing a blob, and its color, find its center of mass.
  */
@@ -86,15 +88,18 @@ public class MassDetectionandObjectPriority implements Callable<Pair<int[],Integ
             MatOfPoint2f peremeter = new MatOfPoint2f();
             contours.get(0).convertTo(peremeter, CvType.CV_32FC2);
             
-            double circularity=4*Math.PI*blobArea/Math.pow(Imgproc.arcLength(peremeter,true),2);//TODO problem with NaN here
+            double circularity=4*Math.PI*blobArea/Math.pow(Imgproc.arcLength(peremeter,true),2);
             
             //convert both to a ranking mechanism for the likelihood this is a laser point
             priority=(int) ((density*circularity)*100);
             System.out.println("laser density "+density+" laser circularity "+circularity);
 		}
 		else if(identificationType==BlobDetection.PERSON_IDENTIFICATION){
-	        //for person identification, a detected face makes it a top priority. Otherwise, check for other features.
-	        //do in separate file
+		    //get a mask of the original image of the blob
+		    Mat originalblob=new Mat();
+		    img.copyTo(originalblob, blobimg);
+		    //find liklihood this is a person
+		    priority=DetectPerson.isBlobHuman(originalblob);
 		}
 
 		return Pair.with(point, priority);
