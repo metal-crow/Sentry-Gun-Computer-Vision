@@ -15,21 +15,21 @@ public class DetectPerson {
     private static final String ProfileCascadeClassifierFile="E:/Code Workspace/.external libraries/opencv 2.4.9/sources/data/lbpcascades/lbpcascade_profileface.xml";
     
     public static int isBlobHuman(Mat img){
+        int blobArea=Core.countNonZero(img);//TODO figure out priority
+
         //first check if we can find a face in this blob. If so, we have a guaranteed person.
         MatOfRect faceDetections = new MatOfRect();
         //check for a frontally facing face
         CascadeClassifier frontalFaceDetector = new CascadeClassifier(FrontalCascadeClassifierFile);
         frontalFaceDetector.detectMultiScale(img, faceDetections);
         if(faceDetections.toArray().length>0){
-            Rect rect=faceDetections.toArray()[0];//there should only be 1 face in a blob
-            return (rect.width*rect.height);//size of face = priority
+            return blobArea;
         }
         //check for a face in profile
         CascadeClassifier profileFaceDetector = new CascadeClassifier(ProfileCascadeClassifierFile);
         profileFaceDetector.detectMultiScale(img, faceDetections);
         if(faceDetections.toArray().length>0){
-            Rect rect=faceDetections.toArray()[0];
-            return (rect.width*rect.height);
+            return blobArea;
         }
         
         //next check for skin, see if the blob contains skin color
