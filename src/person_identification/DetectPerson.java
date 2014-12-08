@@ -1,12 +1,12 @@
 package person_identification;
 
+import org.javatuples.Pair;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;
-import org.opencv.core.Point;
-import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.highgui.Highgui;
+import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
 
 public class DetectPerson {
@@ -14,6 +14,9 @@ public class DetectPerson {
     private static final String FrontalCascadeClassifierFile="E:/Code Workspace/.external libraries/opencv 2.4.9/sources/data/lbpcascades/lbpcascade_frontalface.xml";
     private static final String ProfileCascadeClassifierFile="E:/Code Workspace/.external libraries/opencv 2.4.9/sources/data/lbpcascades/lbpcascade_profileface.xml";
     
+    //combined HSB values for various skin colors
+    private static final Pair<Scalar,Scalar> skinColors=Pair.with(new Scalar(9, 30, 20), new Scalar(28, 70, 90));
+
     public static int isBlobHuman(Mat img){
         int blobArea=Core.countNonZero(img);//TODO figure out priority
 
@@ -40,22 +43,12 @@ public class DetectPerson {
     public static void main(String[] args) {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         
-        Mat image = Highgui.imread("testing/circle blob.png");
-        CascadeClassifier frontalFaceDetector = new CascadeClassifier(FrontalCascadeClassifierFile);
+        Mat image = Highgui.imread("testing/skin colors.png");
+        Imgproc.cvtColor(image, image, Imgproc.COLOR_BGR2HSV);
         
-        // Detect faces in the image.
-        // MatOfRect is a special container class for Rect.
-        MatOfRect faceDetections = new MatOfRect();
-        frontalFaceDetector.detectMultiScale(image, faceDetections);
-
-        System.out.println(String.format("Detected %s faces", faceDetections.toArray().length));
-
-        // Draw a bounding box around each face.
-        for (Rect rect : faceDetections.toArray()) {
-            Core.rectangle(image, new Point(rect.x, rect.y), new Point(rect.x + rect.width, rect.y + rect.height), new Scalar(0, 255, 0));
-        }
-        
-        // Save the visualized detection.
-        Highgui.imwrite("testing/faceafter.jpg", image);
+        Core.inRange(image, skinColors.getValue0(), skinColors.getValue1(), image);
+                
+        //Save the visualized detection.
+        Highgui.imwrite("testing/skins.jpg", image);
     }
 }
