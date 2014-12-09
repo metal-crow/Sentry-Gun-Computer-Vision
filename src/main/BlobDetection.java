@@ -65,8 +65,10 @@ public class BlobDetection {
         				tasks.add(executor.submit(thread));
                         blobColor++;
     		        }
-    		        //if this blob is too small, delete it
-                    Imgproc.floodFill(img, new Mat(), new Point(x,y), new Scalar(0));
+    		        else{
+    		        	//if this blob is too small, delete it
+    		        	Imgproc.floodFill(img, new Mat(), new Point(x,y), new Scalar(0));
+    		        }
     			}
     		}
     	}

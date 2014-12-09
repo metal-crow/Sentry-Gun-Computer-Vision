@@ -12,6 +12,7 @@ import org.opencv.objdetect.CascadeClassifier;
 
 public class DetectPerson {
 
+	//TODO get rid of this hardcoding
     private static final String FrontalCascadeClassifierFile="E:/Code Workspace/.external libraries/opencv 2.4.9/sources/data/lbpcascades/lbpcascade_frontalface.xml";
     private static final String ProfileCascadeClassifierFile="E:/Code Workspace/.external libraries/opencv 2.4.9/sources/data/lbpcascades/lbpcascade_profileface.xml";
     
@@ -24,6 +25,7 @@ public class DetectPerson {
         int blobArea=Core.countNonZero(img);
 
         //first check if we can find a face in this blob. If so, we have a guaranteed person.
+        //TODO these should always be a higher priority than the skin value. Priority should be (large blob with face>small blob with face>lots of skin on blob>little skin on blob)
         MatOfRect faceDetections = new MatOfRect();
         //check for a frontally facing face
         CascadeClassifier frontalFaceDetector = new CascadeClassifier(FrontalCascadeClassifierFile);
