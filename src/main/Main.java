@@ -28,7 +28,7 @@ import user_view.RealTime_Video_Showing;
 public class Main {
  
 	private static Mat prevFrame;
-	private static Mat curFrame;
+	public static Mat curFrame;
 	private static Mat nextFrame;
 	public static int frame_count=0;
 

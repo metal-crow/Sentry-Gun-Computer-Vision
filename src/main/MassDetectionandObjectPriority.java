@@ -99,7 +99,7 @@ public class MassDetectionandObjectPriority implements Callable<Pair<int[],Integ
 		    //get a mask of the original image of the blob
 		    Mat originalblob=new Mat();
 		    //make sure we dont just get a mask of the blob, but everything inside the blob as well (i.e a movement crescent)
-		    originalblob=img.submat(boundingbox);
+		    originalblob=Main.curFrame.submat(boundingbox);
 		    //find likelihood this is a person
 		    priority=DetectPerson.isBlobHuman(originalblob);
 		}

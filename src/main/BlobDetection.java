@@ -22,7 +22,7 @@ public class BlobDetection {
 		LASER_IDENTIFICATION=1,
 		PERSON_IDENTIFICATION=2;
 	
-	private static final int minBlobAreaPX=300;
+	private static final int minBlobAreaPX=3000;
 
 	/**
 	 * Find solid color blobs in a binary image. White is assumed to be the blobs of interest
