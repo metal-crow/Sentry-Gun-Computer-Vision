@@ -11,6 +11,7 @@ import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
+import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.highgui.Highgui;
@@ -100,6 +101,11 @@ public class MassDetectionandObjectPriority implements Callable<Pair<int[],Integ
 		    Mat originalblob=new Mat();
 		    //make sure we dont just get a mask of the blob, but everything inside the blob as well (i.e a movement crescent)
 		    originalblob=Main.curFrame.submat(boundingbox);
+		    
+		    Mat test=Main.curFrame.clone();
+		    Core.rectangle(test, new Point(boundingbox.x,boundingbox.y), new Point(boundingbox.x+boundingbox.width,boundingbox.y+boundingbox.height), new Scalar(0,255,0));
+	        Highgui.imwrite("testing/person/"+Main.frame_count+" "+boundingbox.x+"output.jpg",test);
+	        
 		    //find likelihood this is a person
 		    priority=DetectPerson.isBlobHuman(originalblob);
 		}

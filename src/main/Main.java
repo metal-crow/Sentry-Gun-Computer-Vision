@@ -169,7 +169,7 @@ public class Main {
 	        //DEBUG WRITING FOR TESTING
 			try {
 				panel.setImage(drawImg);
-		        //Highgui.imwrite("testing/test/"+frame_count+"output.jpg",drawImg);
+		        Highgui.imwrite("testing/test/"+frame_count+"output.jpg",drawImg);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

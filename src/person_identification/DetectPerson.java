@@ -1,13 +1,10 @@
 package person_identification;
 
-import main.Main;
-
 import org.javatuples.Pair;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;
 import org.opencv.core.Scalar;
-import org.opencv.highgui.Highgui;
 import org.opencv.objdetect.CascadeClassifier;
 
 public class DetectPerson {
@@ -19,13 +16,21 @@ public class DetectPerson {
     //combined HSB values for various skin colors
     private static final Pair<Scalar,Scalar> skinColors=Pair.with(new Scalar(4, 76, 51), new Scalar(14, 179, 230));
 
+    /*
+     * Priority should be 
+     * 
+     * large blob with face >
+     * small blob with face >
+     * lots of skin on blob >
+     * little skin on blob >
+     * large blob no detection >
+     * small blob no detection
+     */
     public static int isBlobHuman(Mat img){
-        Highgui.imwrite("testing/person/"+Main.frame_count+" "+img.hashCode()+"output.jpg",img);
-
-        int blobArea=Core.countNonZero(img);
+        int blobArea=img.width()*img.height();
 
         //first check if we can find a face in this blob. If so, we have a guaranteed person.
-        //TODO these should always be a higher priority than the skin value. Priority should be (large blob with face>small blob with face>lots of skin on blob>little skin on blob)
+        //TODO these should always be a higher priority than the skin value. 
         MatOfRect faceDetections = new MatOfRect();
         //check for a frontally facing face
         CascadeClassifier frontalFaceDetector = new CascadeClassifier(FrontalCascadeClassifierFile);
