@@ -1,5 +1,7 @@
 package person_identification;
 
+import main.Main;
+
 import org.javatuples.Pair;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
@@ -15,6 +17,7 @@ public class DetectPerson {
     
     //combined HSB values for various skin colors
     private static final Pair<Scalar,Scalar> skinColors=Pair.with(new Scalar(4, 76, 51), new Scalar(14, 179, 230));
+    
 
     /*
      * Priority should be 
@@ -28,21 +31,22 @@ public class DetectPerson {
      */
     public static int isBlobHuman(Mat img){
         int blobArea=img.width()*img.height();
+        int maxImageArea=Main.curFrame.width()*Main.curFrame.height();
 
         //first check if we can find a face in this blob. If so, we have a guaranteed person.
-        //TODO these should always be a higher priority than the skin value. 
+        //the priority must be > than 2 things, so add the maximum 2 times 
         MatOfRect faceDetections = new MatOfRect();
         //check for a frontally facing face
         CascadeClassifier frontalFaceDetector = new CascadeClassifier(FrontalCascadeClassifierFile);
         frontalFaceDetector.detectMultiScale(img, faceDetections);
         if(faceDetections.toArray().length>0){
-            return blobArea;
+            return blobArea+(maxImageArea*2);
         }
         //check for a face in profile
         CascadeClassifier profileFaceDetector = new CascadeClassifier(ProfileCascadeClassifierFile);
         profileFaceDetector.detectMultiScale(img, faceDetections);
         if(faceDetections.toArray().length>0){
-            return blobArea;
+            return blobArea+(maxImageArea*2);
         }
         
         //next check for skin, see if the blob contains skin color
@@ -52,10 +56,12 @@ public class DetectPerson {
         //if there is a non-insignificant amount of skin
         int amountOfSkin=Core.countNonZero(skin);
         if(amountOfSkin>img.cols()*3){
-            return amountOfSkin;
+            //the priority must be > than 1 thing, so add the maximum 1 time
+            return amountOfSkin+maxImageArea;
         }
         
-        return 0;
+        //if we find neither, the size of the blob is the priority
+        return blobArea;
     }
     
 }
