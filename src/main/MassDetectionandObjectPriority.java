@@ -35,11 +35,12 @@ public class MassDetectionandObjectPriority implements Callable<Pair<int[],Integ
 		//get a mask of the color
 		Mat blobimg=new Mat();
 		Core.inRange(img, new Scalar(color), new Scalar(color), blobimg);
+        Highgui.imwrite("testing/blob/"+Main.frame_count+" "+img.hashCode()+"output.jpg",blobimg);
 		//get a bounding rectangle around the blob
 		//is findCountours really the fastest and best method for this?
 		List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
 		Imgproc.findContours(blobimg.clone(), contours, new Mat(), Imgproc.RETR_EXTERNAL , Imgproc.CHAIN_APPROX_NONE);
-		Rect boundingbox=Imgproc.boundingRect(contours.get(0));//there should always be only one (flood fill from BlobDetection)
+		Rect boundingbox=Imgproc.boundingRect(contours.get(0));//there should always be only one (flood fill from BlobDetection) TODO error here
 		
 		//find the center of mass in this area
 		//do a binary search on the image in the both dimension.
@@ -97,8 +98,9 @@ public class MassDetectionandObjectPriority implements Callable<Pair<int[],Integ
 		else if(identificationType==BlobDetection.PERSON_IDENTIFICATION){
 		    //get a mask of the original image of the blob
 		    Mat originalblob=new Mat();
-		    img.copyTo(originalblob, blobimg);
-		    //find liklihood this is a person
+		    //make sure we dont just get a mask of the blob, but everything inside the blob as well (i.e a movement crescent)
+		    originalblob=img.submat(boundingbox);
+		    //find likelihood this is a person
 		    priority=DetectPerson.isBlobHuman(originalblob);
 		}
 

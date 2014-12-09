@@ -1,12 +1,13 @@
 package person_identification;
 
+import main.Main;
+
 import org.javatuples.Pair;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;
 import org.opencv.core.Scalar;
 import org.opencv.highgui.Highgui;
-import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
 
 public class DetectPerson {
@@ -18,7 +19,9 @@ public class DetectPerson {
     private static final Pair<Scalar,Scalar> skinColors=Pair.with(new Scalar(4, 76, 51), new Scalar(14, 179, 230));
 
     public static int isBlobHuman(Mat img){
-        int blobArea=Core.countNonZero(img);//TODO figure out priority
+        Highgui.imwrite("testing/person/"+Main.frame_count+" "+img.hashCode()+"output.jpg",img);
+
+        int blobArea=Core.countNonZero(img);
 
         //first check if we can find a face in this blob. If so, we have a guaranteed person.
         MatOfRect faceDetections = new MatOfRect();
@@ -45,20 +48,7 @@ public class DetectPerson {
             return amountOfSkin;
         }
         
-        
-
         return 0;
     }
     
-    public static void main(String[] args) {
-        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-        
-        Mat image = Highgui.imread("testing/face3.jpg");
-        Imgproc.cvtColor(image, image, Imgproc.COLOR_BGR2HSV);
-                
-        Core.inRange(image, skinColors.getValue0(), skinColors.getValue1(), image);
-                
-        //Save the visualized detection.
-        Highgui.imwrite("testing/skins.jpg", image);
-    }
 }

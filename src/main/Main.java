@@ -30,7 +30,7 @@ public class Main {
 	private static Mat prevFrame;
 	private static Mat curFrame;
 	private static Mat nextFrame;
-	private static int frame_count=0;
+	public static int frame_count=0;
 
 	//Green min hue 42.5,max hue 70
 	//Opencv is 0-180 hue range, so if you change this remember
@@ -51,10 +51,10 @@ public class Main {
     	curFrame=new Mat();
     	nextFrame=new Mat();
     	
-        String filename="testing/green laser.avi";
-        //VideoCapture video = new VideoCapture(filename);
+        String filename="testing/general video.avi";
+        VideoCapture video = new VideoCapture(filename);
     	
-        VideoCapture video = new VideoCapture(0);
+        //VideoCapture video = new VideoCapture(0);
         video.read(curFrame);
     	video.read(nextFrame);
     	
@@ -203,10 +203,10 @@ public class Main {
         Imgproc.cvtColor(frameDiff, frameDiff, Imgproc.COLOR_BGR2GRAY);
     	Imgproc.threshold(frameDiff, frameDiff, 35, 255, Imgproc.THRESH_BINARY);
     	
-		//Highgui.imwrite("testing/movement/"+frame_count+"output.jpg",frameDiff);
+		Highgui.imwrite("testing/movement/"+frame_count+"output.jpg",frameDiff);
     	
     	//now that be have the mat of movement, get each unique blob of movement in it.
-    	return BlobDetection.findSolidBlobs(frameDiff,BlobDetection.BASIC_IDENTIFICATION);
+    	return BlobDetection.findSolidBlobs(frameDiff,BlobDetection.PERSON_IDENTIFICATION);
     }
     
     /** find green dot in image */

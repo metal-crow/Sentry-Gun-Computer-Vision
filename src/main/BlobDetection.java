@@ -22,7 +22,7 @@ public class BlobDetection {
 		LASER_IDENTIFICATION=1,
 		PERSON_IDENTIFICATION=2;
 	
-	private static final int minBlobAreaPX=100;
+	private static final int minBlobAreaPX=300;
 
 	/**
 	 * Find solid color blobs in a binary image. White is assumed to be the blobs of interest
@@ -65,6 +65,8 @@ public class BlobDetection {
         				tasks.add(executor.submit(thread));
                         blobColor++;
     		        }
+    		        //if this blob is too small, delete it
+                    Imgproc.floodFill(img, new Mat(), new Point(x,y), new Scalar(0));
     			}
     		}
     	}
