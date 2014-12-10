@@ -103,10 +103,12 @@ public class ImagePartitioning {
 		int fragmentSide=Math.round((float)Math.sqrt(fragmentArea));
 		int fragmentCount=0;
 		
-		for(int y=0;y<Main.curFrame.height();y+=fragmentSide){
-			for(int x=0;x<Main.curFrame.width();x+=fragmentSide){
-				//to fully honor the correct # of fragment, the last fragment has to encompass the remaining image space, 
-				//and may have to expand/shrink by a maximum of half its side length
+		int y=0;
+		while(y<Main.curFrame.height() && fragmentCount<fragments){
+			int x=0;
+			while(x<Main.curFrame.width() && fragmentCount<fragments){
+				//TODO to fully honor the correct # of fragment, the right and bottom edge fragment has to encompass the
+				//remaining image space, and may have to expand/shrink by a maximum of half its side length
 				Mat fragment;
 				if(fragmentCount==fragments-1){
 					fragment=Main.curFrame.submat(y, Main.curFrame.height(), x, Main.curFrame.width());
@@ -116,7 +118,10 @@ public class ImagePartitioning {
 				Callable<Pair<int[],Integer>> thread=new MassDetectionandObjectPriority(y,x,fragment);
 				tasks.add(executor.submit(thread));
 				fragmentCount++;
+				
+				x+=fragmentSide;
 			}
+			y+=fragmentSide;
 		}
 		
     	//get the results of the threads
