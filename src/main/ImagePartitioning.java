@@ -14,7 +14,7 @@ import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
-public class BlobDetection {
+public class ImagePartitioning {
 	
 	//method options for determining priority of blobs. Used in method.
 	public static final int
@@ -36,7 +36,7 @@ public class BlobDetection {
 	 * @return an array containing the center of each blob, and the blob's priority
 	 * @throws Exception if the supplied priority identification type is invalid
 	 */
-	public static ArrayList<Pair<int[], Integer>> findSolidBlobs(Mat img, int identification) throws Exception{
+	public static ArrayList<Pair<int[], Integer>> BlobDetection(Mat img, int identification) throws Exception{
 		if(identification<0 || identification>2){
 			throw new Exception("Invalid priority identifier.");
 		}
@@ -73,6 +73,52 @@ public class BlobDetection {
     		}
     	}
     	
+    	//get the results of the threads
+    	ArrayList<Pair<int[], Integer>> targets=new ArrayList<Pair<int[], Integer>>(tasks.size());
+    	
+    	for(Future<Pair<int[],Integer>> task:tasks){
+    		try {
+				targets.add(task.get());
+			} catch (InterruptedException | ExecutionException e) {
+				e.printStackTrace();
+			}
+    	}
+		
+    	//return threads results
+		return targets;
+	}
+
+	/**
+	 * Split the image into equal sized fragments, and check for a person in each fragment.
+	 * Used for at rest person detection
+	 * @param fragments the total number of fragments to split the image into.
+	 */
+	public static ArrayList<Pair<int[], Integer>> FragmentationSplitting(int fragments) {
+        ExecutorService executor = Executors.newFixedThreadPool(fragments);
+		ArrayList<Future<Pair<int[],Integer>>> tasks = new ArrayList<Future<Pair<int[],Integer>>>(fragments);
+
+		//fragment the image
+		//we want each fragment to be as close to a square as possible to maximize available area to analyze
+		int fragmentArea=Main.frameArea/fragments;
+		int fragmentSide=Math.round((float)Math.sqrt(fragmentArea));
+		int fragmentCount=0;
+		
+		for(int y=0;y<Main.curFrame.height();y+=fragmentSide){
+			for(int x=0;x<Main.curFrame.width();x+=fragmentSide){
+				//to fully honor the correct # of fragment, the last fragment has to encompass the remaining image space, 
+				//and may have to expand/shrink by a maximum of half its side length
+				Mat fragment;
+				if(fragmentCount==fragments-1){
+					fragment=Main.curFrame.submat(y, Main.curFrame.height(), x, Main.curFrame.width());
+				}else{
+					fragment=Main.curFrame.submat(y, y+fragmentSide, x, x+fragmentSide);
+				}
+				Callable<Pair<int[],Integer>> thread=new MassDetectionandObjectPriority(y,x,fragment);
+				tasks.add(executor.submit(thread));
+				fragmentCount++;
+			}
+		}
+		
     	//get the results of the threads
     	ArrayList<Pair<int[], Integer>> targets=new ArrayList<Pair<int[], Integer>>(tasks.size());
     	

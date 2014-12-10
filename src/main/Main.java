@@ -28,10 +28,11 @@ import user_view.RealTime_Video_Showing;
 public class Main {
  
 	private static Mat prevFrame;
-	public static Mat curFrame;
+	public static Mat curFrame;//public so that sub methods can access it without it being passed through their parent
 	private static Mat nextFrame;
 	public static int frame_count=0;
-
+	public static int frameArea;//prevents having to recalculate every call to some methods
+	
 	//Green min hue 42.5,max hue 70
 	//Opencv is 0-180 hue range, so if you change this remember
 	public static final double[] laser_color_range={67,80};
@@ -50,6 +51,7 @@ public class Main {
         prevFrame=new Mat();
     	curFrame=new Mat();
     	nextFrame=new Mat();
+    	frameArea=curFrame.width()*curFrame.height();
     	
         String filename="testing/general video.avi";
         VideoCapture video = new VideoCapture(filename);
@@ -128,17 +130,7 @@ public class Main {
     		if(!foundTarget && targets.size()>0){
 	    		foundTarget=true;
 
-	    		//get the highest priority target (most likely to be a person)
-	    		Pair<int[], Integer> movementtarget=targets.get(0);
-	    		for(Pair<int[], Integer> t:targets){
-	    		    
-                    //Core.circle(drawImg, new Point(t.getValue0()[0],t.getValue0()[1]), 4, new Scalar(0,0,255),-1);//DEBUGGING
-
-	    			if(t.getValue1()>movementtarget.getValue1()){
-	    				movementtarget=t;
-	    			}
-	    		}
-	    		System.out.println("Movement coord: "+Arrays.toString(movementtarget.getValue0()));
+	    		Pair<int[], Integer> movementtarget=maxPriority(targets);
 	    		
     			//set the coordinate as the point to be shot
 	        	try {
@@ -149,9 +141,21 @@ public class Main {
 	        	Core.circle(drawImg, new Point(movementtarget.getValue0()[0],movementtarget.getValue0()[1]), 4, new Scalar(0,0,255),-1);//DEBUGGING
     		}
 	        
-    		//TODO if we have not found any movement or laser pointer, perform at rest person identification
+    		//if we have not found any movement or laser pointer, perform at rest person identification
     		if(!foundTarget){
-    			
+        		targets = ImagePartitioning.FragmentationSplitting(16);
+        		if(targets.size()>0){
+        			foundTarget=true;
+		    		Pair<int[], Integer> movementtarget=maxPriority(targets);
+		    		
+	    			//set the coordinate as the point to be shot
+		        	try {
+		        		arduinoOut.arduinoScreenPositiontoAngle(movementtarget.getValue0(),curFrame.width(),curFrame.height());
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+		        	Core.circle(drawImg, new Point(movementtarget.getValue0()[0],movementtarget.getValue0()[1]), 4, new Scalar(0,0,255),-1);//DEBUGGING
+        		}
     		}
     		
     		//if we have found a target, we have already sent its coordinates to the arduino. now shoot
@@ -190,6 +194,19 @@ public class Main {
         Thread.sleep(2000);
     }
     
+	private static Pair<int[], Integer> maxPriority(ArrayList<Pair<int[], Integer>> targets) {
+		//get the highest priority target (most likely to be a person)
+		Pair<int[], Integer> movementtarget=targets.get(0);
+		for(Pair<int[], Integer> t:targets){
+            //Core.circle(drawImg, new Point(t.getValue0()[0],t.getValue0()[1]), 4, new Scalar(0,0,255),-1);//DEBUGGING
+			if(t.getValue1()>movementtarget.getValue1()){
+				movementtarget=t;
+			}
+		}
+		System.out.println("Movement coord: "+Arrays.toString(movementtarget.getValue0()));
+		return movementtarget;
+	}
+
 	/**Get a area in the video that is movement */
     private static ArrayList<Pair<int[], Integer>> movementDetection() throws Exception{
     	//get the difference between the frames
@@ -206,7 +223,7 @@ public class Main {
 		Highgui.imwrite("testing/movement/"+frame_count+"output.jpg",frameDiff);
     	
     	//now that be have the mat of movement, get each unique blob of movement in it.
-    	return BlobDetection.findSolidBlobs(frameDiff,BlobDetection.PERSON_IDENTIFICATION);
+    	return ImagePartitioning.BlobDetection(frameDiff,ImagePartitioning.PERSON_IDENTIFICATION);
     }
     
     /** find green dot in image */
@@ -221,6 +238,6 @@ public class Main {
         
         //Highgui.imwrite("testing/laser/"+frame_count+"output LZ.jpg",hsv_channel);
         
-        return BlobDetection.findSolidBlobs(laser_binary_channels.get(laser_binary_channels.size()-1),BlobDetection.LASER_IDENTIFICATION);
+        return ImagePartitioning.BlobDetection(laser_binary_channels.get(laser_binary_channels.size()-1),ImagePartitioning.LASER_IDENTIFICATION);
     }
 }

@@ -27,6 +27,8 @@ public class MassDetectionandObjectPriority implements Callable<Pair<int[],Integ
 	private Mat img;
 	private int color;
 	private int identificationType;
+	private boolean onlyPersonDetection;
+	private int[] personDetectionPoint;
 	
 	/**
 	 * @return the center of mass of the blob (x,y), and its priority as a target
@@ -74,12 +76,12 @@ public class MassDetectionandObjectPriority implements Callable<Pair<int[],Integ
 		int[] point={rect[0],rect[1]};
 		int priority=0;
 		
-		if(identificationType==BlobDetection.BASIC_IDENTIFICATION){
+		if(identificationType==ImagePartitioning.BASIC_IDENTIFICATION){
 		    //calculate priority based on size of blob
 	        int blobArea=Core.countNonZero(blobimg.submat(boundingbox.y, boundingbox.y+boundingbox.height, boundingbox.x, boundingbox.x+boundingbox.width));
 		    priority=blobArea;
 		}
-		else if(identificationType==BlobDetection.LASER_IDENTIFICATION){
+		else if(identificationType==ImagePartitioning.LASER_IDENTIFICATION){
 		    int blobArea=Core.countNonZero(blobimg.submat(boundingbox.y, boundingbox.y+boundingbox.height, boundingbox.x, boundingbox.x+boundingbox.width));
 		    
 	        //density of the area (# of blob pixels/area of rectangle)
@@ -96,7 +98,7 @@ public class MassDetectionandObjectPriority implements Callable<Pair<int[],Integ
             priority=(int) ((density*circularity)*100);
             System.out.println("laser density "+density+" laser circularity "+circularity);
 		}
-		else if(identificationType==BlobDetection.PERSON_IDENTIFICATION){
+		else if(identificationType==ImagePartitioning.PERSON_IDENTIFICATION){
 		    //get a mask of the original image of the blob
 		    Mat originalblob=new Mat();
 		    //make sure we dont just get a mask of the blob, but everything inside the blob as well (i.e a movement crescent)
@@ -124,9 +126,23 @@ public class MassDetectionandObjectPriority implements Callable<Pair<int[],Integ
 		color=colorOfBlob;
 	}
 	
+	/**
+	 * Use this constructor if the image should only be put through DetectPerson. Use for the full color at rest detection, when we dont have a binary mat.
+	 * @param img
+	 */
+	public MassDetectionandObjectPriority(int y, int x, Mat img) {
+		this.img=img;
+		personDetectionPoint=new int[]{x+(img.width()/2),y+(img.height()/2)};
+		this.onlyPersonDetection=true;
+	}
+	
 	@Override
 	public Pair<int[],Integer> call() throws Exception {
-		return BlobInformation();
+		if(onlyPersonDetection){
+			return Pair.with(personDetectionPoint, DetectPerson.isBlobHuman(img));
+		}else{
+			return BlobInformation();
+		}
 	}
 	
 	public static void main(String[] args) throws Exception {

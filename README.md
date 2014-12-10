@@ -8,10 +8,9 @@ Uses OpenCV 2.4.9. If you can get 3 to work with java please tell me how. Also J
 ToDo (in order)
 ==========================
 1. Work on person detection algorithms
-2. Add at rest person detection
-3. Build the full hardware
-4. Write up this documentation
-5. Add controls and gui for the user
+2. Build the full hardware
+3. Write up this documentation
+4. Add controls and gui for the user
 
 Notes
 ==========================
