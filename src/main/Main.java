@@ -31,7 +31,6 @@ public class Main {
 	public static Mat curFrame;//public so that sub methods can access it without it being passed through their parent
 	private static Mat nextFrame;
 	public static int frame_count=0;
-	public static int frameArea;//prevents having to recalculate every call to some methods
 	
 	//Green min hue 42.5,max hue 70
 	//Opencv is 0-180 hue range, so if you change this remember
@@ -51,7 +50,6 @@ public class Main {
         prevFrame=new Mat();
     	curFrame=new Mat();
     	nextFrame=new Mat();
-    	frameArea=curFrame.width()*curFrame.height();
     	
         String filename="testing/general video.avi";
         VideoCapture video = new VideoCapture(filename);
@@ -130,7 +128,15 @@ public class Main {
     		if(!foundTarget && targets.size()>0){
 	    		foundTarget=true;
 
-	    		Pair<int[], Integer> movementtarget=maxPriority(targets);
+	    	     //get the highest priority target (most likely to be a person)
+	            Pair<int[], Integer> movementtarget=targets.get(0);
+	            for(Pair<int[], Integer> t:targets){
+	                //Core.circle(drawImg, new Point(t.getValue0()[0],t.getValue0()[1]), 4, new Scalar(0,0,255),-1);//DEBUGGING
+	                if(t.getValue1()>movementtarget.getValue1()){
+	                    movementtarget=t;
+	                }
+	            }
+	            System.out.println("Movement coord: "+Arrays.toString(movementtarget.getValue0()));
 	    		
     			//set the coordinate as the point to be shot
 	        	try {
@@ -142,20 +148,29 @@ public class Main {
     		}
 	        
     		//if we have not found any movement or laser pointer, perform at rest person identification
-    		if(!foundTarget){
+    		//edge case where the first couple of frames are empty
+    		if(!foundTarget && Main.curFrame.width()!=0){
         		targets = ImagePartitioning.FragmentationSplitting(16);
-        		if(targets.size()>0){
-        			foundTarget=true;
-		    		Pair<int[], Integer> movementtarget=maxPriority(targets);
-		    		
-	    			//set the coordinate as the point to be shot
+        		//if none of these results have detected a face or skin, they will return the size of their fragment as priority
+        		//exclude any results with a priority < frameArea (see detectperson for how priority generation works and why this works)
+    	        Pair<int[], Integer> movementtarget=null;
+    	        for(Pair<int[], Integer> t:targets){
+    	            //Core.circle(drawImg, new Point(t.getValue0()[0],t.getValue0()[1]), 4, new Scalar(0,0,255),-1);//DEBUGGING
+    	            if((movementtarget==null && t.getValue1()>(curFrame.width()*curFrame.height())) || (movementtarget!=null && t.getValue1()>movementtarget.getValue1())){
+    	                movementtarget=t;
+    	                foundTarget=true;
+    	            }
+    	        }
+    	        
+	    		if(foundTarget){
+	                 System.out.println("Movement coord: "+Arrays.toString(movementtarget.getValue0()));
 		        	try {
 		        		arduinoOut.arduinoScreenPositiontoAngle(movementtarget.getValue0(),curFrame.width(),curFrame.height());
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
 		        	Core.circle(drawImg, new Point(movementtarget.getValue0()[0],movementtarget.getValue0()[1]), 4, new Scalar(0,0,255),-1);//DEBUGGING
-        		}
+	    		}
     		}
     		
     		//if we have found a target, we have already sent its coordinates to the arduino. now shoot
@@ -194,18 +209,6 @@ public class Main {
         Thread.sleep(2000);
     }
     
-	private static Pair<int[], Integer> maxPriority(ArrayList<Pair<int[], Integer>> targets) {
-		//get the highest priority target (most likely to be a person)
-		Pair<int[], Integer> movementtarget=targets.get(0);
-		for(Pair<int[], Integer> t:targets){
-            //Core.circle(drawImg, new Point(t.getValue0()[0],t.getValue0()[1]), 4, new Scalar(0,0,255),-1);//DEBUGGING
-			if(t.getValue1()>movementtarget.getValue1()){
-				movementtarget=t;
-			}
-		}
-		System.out.println("Movement coord: "+Arrays.toString(movementtarget.getValue0()));
-		return movementtarget;
-	}
 
 	/**Get a area in the video that is movement */
     private static ArrayList<Pair<int[], Integer>> movementDetection() throws Exception{

@@ -31,7 +31,8 @@ public class DetectPerson {
      */
     public static int isBlobHuman(Mat img){
         int blobArea=img.width()*img.height();
-
+        int frameArea=Main.curFrame.width()*Main.curFrame.height();
+        
         //first check if we can find a face in this blob. If so, we have a guaranteed person.
         //the priority must be > than 2 things, so add the maximum 2 times 
         MatOfRect faceDetections = new MatOfRect();
@@ -39,13 +40,13 @@ public class DetectPerson {
         CascadeClassifier frontalFaceDetector = new CascadeClassifier(FrontalCascadeClassifierFile);
         frontalFaceDetector.detectMultiScale(img, faceDetections);
         if(faceDetections.toArray().length>0){
-            return blobArea+(Main.frameArea*2);
+            return blobArea+(frameArea*2);
         }
         //check for a face in profile
         CascadeClassifier profileFaceDetector = new CascadeClassifier(ProfileCascadeClassifierFile);
         profileFaceDetector.detectMultiScale(img, faceDetections);
         if(faceDetections.toArray().length>0){
-            return blobArea+(Main.frameArea*2);
+            return blobArea+(frameArea*2);
         }
         
         //next check for skin, see if the blob contains skin color
@@ -56,7 +57,7 @@ public class DetectPerson {
         int amountOfSkin=Core.countNonZero(skin);
         if(amountOfSkin>img.cols()*3){
             //the priority must be > than 1 thing, so add the maximum 1 time
-            return amountOfSkin+Main.frameArea;
+            return amountOfSkin+frameArea;
         }
         
         //if we find neither, the size of the blob is the priority

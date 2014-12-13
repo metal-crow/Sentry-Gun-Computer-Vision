@@ -19,6 +19,8 @@ Additonally, all sentry guns on the internet i've looked up primarily use motion
 For right now, I'm going to stop working on person identification and just use my written motion detection and laser detection code to identify targets.
 I'm going to start work on the actual Hardware of the project now.
 
+Seriously considering rewriting this in C++.
+
 Hardware
 ==========================
 I've tried stepper motors. It has ended poorly. Too slow, weird responsivness, not actually turning to the angle i send to them, partial steps, bad jittering and jerky movement, being all around more complicated, error prone, and just not working.
