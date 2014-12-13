@@ -108,21 +108,17 @@ public class ImagePartitioning {
 		while(y+fragmentSide<Main.curFrame.height()){
 			int x=0;
 			while(x+fragmentSide<Main.curFrame.width()){
-                System.out.println((y+fragmentSide)+"/"+Main.curFrame.height()+" "+(x+fragmentSide)+"/"+Main.curFrame.width());
 				//To fully honor the correct # of fragment, the right and bottom side edge fragment have to encompass the
 				//remaining image space, and may have to expand/shrink by a maximum of half its side length
 				Mat fragment;
 				//right edge but not bottom
 				if(fragmentCount%numberOfFragmentsPerRow==0 && fragmentCount+numberOfFragmentsPerRow<fragments){
-				    System.out.println("R");
 					fragment=Main.curFrame.submat(y, y+fragmentSide, x, Main.curFrame.width());
 				}
 				//bottom right edge
 				else if(fragmentCount%numberOfFragmentsPerRow==0 && fragmentCount+numberOfFragmentsPerRow>=fragments){
-				    System.out.println("BR");
                     fragment=Main.curFrame.submat(y, Main.curFrame.height(), x, Main.curFrame.width());
 				}else{
-				    System.out.println("normal");
 					fragment=Main.curFrame.submat(y, y+fragmentSide, x, x+fragmentSide);
 				}
 				Callable<Pair<int[],Integer>> thread=new MassDetectionandObjectPriority(y,x,fragment);
