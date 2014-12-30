@@ -8,7 +8,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.javatuples.Pair;
-import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
@@ -50,15 +49,9 @@ public class ImagePartitioning {
     			//the top left corner of a blob
     			if(img.get(y, x)[0]==255){    		    
     				//flood fill the blob
-    				Imgproc.floodFill(img, new Mat(), new Point(x,y), new Scalar(blobColor));
+    			    int areaOfBlob=Imgproc.floodFill(img, new Mat(), new Point(x,y), new Scalar(blobColor));
     				
-                    //if blob had enough pixels to be a valid blob (not noise, artifacts, save threads)
-    				//TODO is there a way to get this from flood fill? Would be a lot faster than this.
-    		        Mat singleBlob=new Mat();
-    		        Core.inRange(img, new Scalar(blobColor), new Scalar(blobColor), singleBlob);
-    		        int areaOfBlob=Core.countNonZero(singleBlob);
-    		        singleBlob.release();
-    		        
+                    //if blob had enough pixels to be a valid blob (not noise, artifacts, save threads) 		        
     		        if(areaOfBlob>=minBlobAreaPX){
         				//get the blob's center of mass and its priority in a thread.
         				Callable<Pair<int[],Integer>> thread=new MassDetectionandObjectPriority(img, blobColor, identification);
