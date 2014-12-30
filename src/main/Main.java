@@ -223,7 +223,7 @@ public class Main {
         Imgproc.cvtColor(frameDiff, frameDiff, Imgproc.COLOR_BGR2GRAY);
     	Imgproc.threshold(frameDiff, frameDiff, 35, 255, Imgproc.THRESH_BINARY);
     	
-		Highgui.imwrite("testing/movement/"+frame_count+"output.jpg",frameDiff);
+		//Highgui.imwrite("testing/movement/"+frame_count+"output.jpg",frameDiff);
     	
     	//now that be have the mat of movement, get each unique blob of movement in it.
     	return ImagePartitioning.BlobDetection(frameDiff,ImagePartitioning.PERSON_IDENTIFICATION);
