@@ -38,7 +38,7 @@ public class MassDetectionandObjectPriority implements Callable<Pair<int[],Integ
 		//get a mask of the color
 		Mat blobimg=new Mat();
 		Core.inRange(img, new Scalar(color), new Scalar(color), blobimg);
-        Highgui.imwrite("testing/blob/"+Main.frame_count+" "+img.hashCode()+"output.jpg",blobimg);
+        //Highgui.imwrite("testing/blob/"+Main.frame_count+" "+img.hashCode()+"output.jpg",blobimg);
 		//get a bounding rectangle around the blob
 		//is findCountours really the fastest and best method for this?
 		List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
@@ -106,7 +106,7 @@ public class MassDetectionandObjectPriority implements Callable<Pair<int[],Integ
 		    
 		    Mat test=Main.curFrame.clone();
 		    Core.rectangle(test, new Point(boundingbox.x,boundingbox.y), new Point(boundingbox.x+boundingbox.width,boundingbox.y+boundingbox.height), new Scalar(0,255,0));
-	        Highgui.imwrite("testing/person/"+Main.frame_count+" "+boundingbox.x+"output.jpg",test);
+	        //Highgui.imwrite("testing/person/"+Main.frame_count+" "+boundingbox.x+"output.jpg",test);
 	        
 		    //find likelihood this is a person
 		    priority=DetectPerson.isBlobHuman(originalblob);

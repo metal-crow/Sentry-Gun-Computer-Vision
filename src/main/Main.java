@@ -16,6 +16,7 @@ import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.highgui.Highgui;
 import org.opencv.highgui.VideoCapture;
 import org.opencv.imgproc.Imgproc;
@@ -51,7 +52,7 @@ public class Main {
     	curFrame=new Mat();
     	nextFrame=new Mat();
     	
-        String filename="testing/general video.avi";
+        String filename="testing/suit.avi";
         VideoCapture video = new VideoCapture(filename);
     	
         //VideoCapture video = new VideoCapture(0);
@@ -218,12 +219,17 @@ public class Main {
     	Core.absdiff(prevFrame, nextFrame, absDiff1);
     	Mat absDiff2=new Mat();
     	Core.absdiff(curFrame, nextFrame, absDiff2);
-    	Mat frameDiff=new Mat();
+    	
+        //also do a blur to reduce artifacts and blend areas of movement for better movement detection
+    	Imgproc.blur(absDiff1, absDiff1, new Size(6,6));
+        Imgproc.blur(absDiff2, absDiff2, new Size(6,6));
+
+        Mat frameDiff=new Mat();
     	Core.bitwise_and(absDiff1, absDiff2, frameDiff);
         Imgproc.cvtColor(frameDiff, frameDiff, Imgproc.COLOR_BGR2GRAY);
     	Imgproc.threshold(frameDiff, frameDiff, 35, 255, Imgproc.THRESH_BINARY);
     	
-		//Highgui.imwrite("testing/movement/"+frame_count+"output.jpg",frameDiff);
+		Highgui.imwrite("testing/movement/"+frame_count+"output.jpg",frameDiff);
     	
     	//now that be have the mat of movement, get each unique blob of movement in it.
     	return ImagePartitioning.BlobDetection(frameDiff,ImagePartitioning.PERSON_IDENTIFICATION);

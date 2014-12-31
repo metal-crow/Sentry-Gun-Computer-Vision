@@ -21,7 +21,7 @@ public class ImagePartitioning {
 		LASER_IDENTIFICATION=1,
 		PERSON_IDENTIFICATION=2;
 	
-	private static final int minBlobAreaPX=3000;
+	private static final int minBlobAreaPX=200;//note, this needs to be small in case the person is moving slowly, but opens up for more error and thread use
 
 	/**
 	 * Find solid color blobs in a binary image. White is assumed to be the blobs of interest
