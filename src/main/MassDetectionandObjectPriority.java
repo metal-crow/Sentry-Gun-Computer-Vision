@@ -96,7 +96,7 @@ public class MassDetectionandObjectPriority implements Callable<Pair<int[],Integ
             
             //convert both to a ranking mechanism for the likelihood this is a laser point
             priority=(int) ((density*circularity)*100);
-            System.out.println("laser density "+density+" laser circularity "+circularity);
+            //System.out.println("laser density "+density+" laser circularity "+circularity);//DEBUGGING
 		}
 		else if(identificationType==ImagePartitioning.PERSON_IDENTIFICATION){
 		    //get a mask of the original image of the blob

@@ -52,10 +52,10 @@ public class Main {
     	curFrame=new Mat();
     	nextFrame=new Mat();
     	
-        String filename="testing/suit.avi";
-        VideoCapture video = new VideoCapture(filename);
+        //String filename="testing/movement test 2.avi";
+        //VideoCapture video = new VideoCapture(filename);
+    	VideoCapture video = new VideoCapture(0);
     	
-        //VideoCapture video = new VideoCapture(0);
         video.read(curFrame);
     	video.read(nextFrame);
     	
@@ -84,7 +84,10 @@ public class Main {
     		Mat drawImg=nextFrame.clone();
 	        long time=System.currentTimeMillis();//DEBUGGING TIME
 	        
+	        //the target
+            Pair<int[], Integer> target=Pair.with(new int[]{}, 7);//the min priority for the laser
 	        
+            
 	        //Green dot detection
 	        ArrayList<Pair<int[], Integer>> laser_points = null;
 			try {
@@ -93,28 +96,16 @@ public class Main {
 				System.err.println("Laser pointer error");
 				e1.printStackTrace();
 			}
-	        
-	        //pick the point with the highest priority (most likely to be laser point)
-			Pair<int[], Integer> lasertarget=Pair.with(new int[]{}, -1);
+	        //pick the point with the priority greater than the given min (most likely to be laser point)
     		for(Pair<int[], Integer> t:laser_points){
-    			if(t.getValue1()>lasertarget.getValue1()){
-    				lasertarget=t;
+    			if(t.getValue1()>target.getValue1()){
+    			    target=t;
     				foundTarget=true;
     			}
+    			if(foundTarget){System.out.println("Laser detected");}//DEBUGGING
     		}
-	        
-	        //if we find the laser, set the middle of the rectangle as the point to be shot
-	        if(foundTarget){
-	        	try {
-	        		arduinoOut.arduinoScreenPositiontoAngle(lasertarget.getValue0(),curFrame.width(),curFrame.height());
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-                System.out.println("Laser coord: "+Arrays.toString(lasertarget.getValue0()));
-	        	Core.circle(drawImg, new Point(lasertarget.getValue0()[0],lasertarget.getValue0()[1]), 3, new Scalar(255,0,0),-1);//DEBUGGING
-	        }
-	        
             
+    		
         	//movement detection
     		ArrayList<Pair<int[], Integer>> targets = null;
 			try {
@@ -123,60 +114,43 @@ public class Main {
 				System.err.println("Movement error");
 				e1.printStackTrace();
 			}
-    		
-    		//laser has priority over movement
+    		//make sure we haven't already set the target as laser has priority over movement
     		//if we have any movement
     		if(!foundTarget && targets.size()>0){
 	    		foundTarget=true;
-
-	    	     //get the highest priority target (most likely to be a person)
-	            Pair<int[], Integer> movementtarget=targets.get(0);
+	    	    //get the highest priority target (most likely to be a person)
+	    		target=targets.get(0);//get any movement to compare other movements with.
 	            for(Pair<int[], Integer> t:targets){
-	                //Core.circle(drawImg, new Point(t.getValue0()[0],t.getValue0()[1]), 4, new Scalar(0,0,255),-1);//DEBUGGING
-	                if(t.getValue1()>movementtarget.getValue1()){
-	                    movementtarget=t;
+	                if(t.getValue1()>target.getValue1()){
+	                    target=t;
 	                }
 	            }
-	            System.out.println("Movement coord: "+Arrays.toString(movementtarget.getValue0()));
-	    		
-    			//set the coordinate as the point to be shot
-	        	try {
-	        		arduinoOut.arduinoScreenPositiontoAngle(movementtarget.getValue0(),curFrame.width(),curFrame.height());
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-	        	Core.circle(drawImg, new Point(movementtarget.getValue0()[0],movementtarget.getValue0()[1]), 4, new Scalar(0,0,255),-1);//DEBUGGING
+	            System.out.println("Movement detected");//DEBUGGING
     		}
 	        
+    		
     		//if we have not found any movement or laser pointer, perform at rest person identification
     		//edge case where the first couple of frames are empty
     		if(!foundTarget && Main.curFrame.width()!=0){
+    		    System.out.println("At rest");//DEBUGGING
         		targets = ImagePartitioning.FragmentationSplitting(16);
         		//if none of these results have detected a face or skin, they will return the size of their fragment as priority
         		//exclude any results with a priority < frameArea (see detectperson for how priority generation works and why this works)
-    	        Pair<int[], Integer> movementtarget=null;
+        		target=null;
     	        for(Pair<int[], Integer> t:targets){
-    	            //Core.circle(drawImg, new Point(t.getValue0()[0],t.getValue0()[1]), 4, new Scalar(0,0,255),-1);//DEBUGGING
-    	            if((movementtarget==null && t.getValue1()>(curFrame.width()*curFrame.height())) || (movementtarget!=null && t.getValue1()>movementtarget.getValue1())){
-    	                movementtarget=t;
+    	            if((target==null && t.getValue1()>(curFrame.width()*curFrame.height())) || (target!=null && t.getValue1()>target.getValue1())){
+    	                target=t;
     	                foundTarget=true;
     	            }
     	        }
-    	        
-	    		if(foundTarget){
-	                 System.out.println("Movement coord: "+Arrays.toString(movementtarget.getValue0()));
-		        	try {
-		        		arduinoOut.arduinoScreenPositiontoAngle(movementtarget.getValue0(),curFrame.width(),curFrame.height());
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-		        	Core.circle(drawImg, new Point(movementtarget.getValue0()[0],movementtarget.getValue0()[1]), 4, new Scalar(0,0,255),-1);//DEBUGGING
-	    		}
     		}
     		
-    		//if we have found a target, we have already sent its coordinates to the arduino. now shoot
+    		//if we have found a target, send its coordinates to the arduino and shoot
     		if(foundTarget){
     		    try{
+                    System.out.println("Target coord: "+Arrays.toString(target.getValue0()));//DEBUGGING
+                    arduinoOut.arduinoScreenPositiontoAngle(target.getValue0(),curFrame.width(),curFrame.height());
+                    Core.circle(drawImg, new Point(target.getValue0()[0],target.getValue0()[1]), 4, new Scalar(0,0,255),-1);//DEBUGGING
     		        arduinoOut.fire();
     		    }catch(IOException e){
     		        System.err.println("error firing");
@@ -184,7 +158,7 @@ public class Main {
     		    }
     		}
     		
-	        System.out.println("Time for frame "+frame_count+" (millisec) : "+(System.currentTimeMillis()-time));
+	        System.out.println("Time for frame "+frame_count+" (millisec) : "+(System.currentTimeMillis()-time)+"-------------------------------");
 	        
 	        //DEBUG WRITING FOR TESTING
 			try {

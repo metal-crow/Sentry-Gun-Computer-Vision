@@ -21,7 +21,9 @@ public class ImagePartitioning {
 		LASER_IDENTIFICATION=1,
 		PERSON_IDENTIFICATION=2;
 	
-	private static final int minBlobAreaPX=200;//note, this needs to be small in case the person is moving slowly, but opens up for more error and thread use
+	//note, this needs to be small in case the person is moving slowly, but opens up for more error and thread use
+	//keep it low enough that very slow movement is ignored. We can catch a person without movement
+	private static final int minBlobAreaPX=350;
 
 	/**
 	 * Find solid color blobs in a binary image. White is assumed to be the blobs of interest
@@ -93,7 +95,7 @@ public class ImagePartitioning {
 		//fragment the image
 		//we want each fragment to be as close to a square as possible to maximize available area to analyze
 		int fragmentSide=Math.round((float)Math.sqrt((Main.curFrame.width()*Main.curFrame.height())/fragments));
-		System.out.println(fragmentSide);
+		//System.out.println(fragmentSide);
 		int numberOfFragmentsPerRow=Math.round(Main.curFrame.width()/fragmentSide);
 		int fragmentCount=1;
 		

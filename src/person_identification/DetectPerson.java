@@ -40,12 +40,14 @@ public class DetectPerson {
         CascadeClassifier frontalFaceDetector = new CascadeClassifier(FrontalCascadeClassifierFile);
         frontalFaceDetector.detectMultiScale(img, faceDetections);
         if(faceDetections.toArray().length>0){
+            System.out.println("Detected face");//DEBUGGING
             return blobArea+(frameArea*2);
         }
         //check for a face in profile
         CascadeClassifier profileFaceDetector = new CascadeClassifier(ProfileCascadeClassifierFile);
         profileFaceDetector.detectMultiScale(img, faceDetections);
         if(faceDetections.toArray().length>0){
+            System.out.println("Detected face");//DEBUGGING
             return blobArea+(frameArea*2);
         }
         
@@ -56,6 +58,7 @@ public class DetectPerson {
         //if there is a non-insignificant amount of skin
         int amountOfSkin=Core.countNonZero(skin);
         if(amountOfSkin>img.cols()*3){
+            System.out.println("Detected skin");//DEBUGGING
             //the priority must be > than 1 thing, so add the maximum 1 time
             return amountOfSkin+frameArea;
         }
