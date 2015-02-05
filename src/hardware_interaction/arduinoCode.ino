@@ -10,8 +10,8 @@ void setup() {
  servoX.attach(9);
  servoY.attach(8);
  servoT.attach(7);
- servoX.write(0);//back to 0 degrees
- servoY.write(0);//back to 0 degrees
+ servoX.write(60);//write the starting point as maxangle/2 so that 0 will go left and maxangle will go right
+ servoY.write(37);
  
  delay(1000);//wait for a second
 }
