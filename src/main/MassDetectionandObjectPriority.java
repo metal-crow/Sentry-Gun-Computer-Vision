@@ -29,7 +29,7 @@ public class MassDetectionandObjectPriority implements Callable<Pair<int[],Integ
 	private int identificationType;
 	private boolean onlyPersonDetection;
 	private int[] personDetectionPoint;
-	
+    
 	/**
 	 * @return the center of mass of the blob (x,y), and its priority as a target
 	 */
@@ -38,7 +38,7 @@ public class MassDetectionandObjectPriority implements Callable<Pair<int[],Integ
 		//get a mask of the color
 		Mat blobimg=new Mat();
 		Core.inRange(img, new Scalar(color), new Scalar(color), blobimg);
-        //Highgui.imwrite("testing/blob/"+Main.frame_count+" "+img.hashCode()+"output.jpg",blobimg);
+		
 		//get a bounding rectangle around the blob
 		//is findCountours really the fastest and best method for this?
 		List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
@@ -46,32 +46,7 @@ public class MassDetectionandObjectPriority implements Callable<Pair<int[],Integ
 		Rect boundingbox=Imgproc.boundingRect(contours.get(0));//there should always be only one (flood fill from BlobDetection)
 		
 		//find the center of mass in this area
-		//do a binary search on the image in the both dimension.
-		//Split the image into 4 parts, find the corner with the larger # of blob pixels, store that area in rect, and repeat.
-		//When we reach 1 px width and height of the rect, we now have x,y coordinate for center of mass.
-		int[] rect={boundingbox.x,boundingbox.y,boundingbox.x+boundingbox.width,boundingbox.y+boundingbox.height};
-		
-		while(rect[3]-rect[1]>1 && rect[2]-rect[0]>1){			
-			//split image and see which corner has more blob
-			int countLT = Core.countNonZero(blobimg.submat(rect[1], (rect[1]+rect[3])/2, rect[0], (rect[0]+rect[2])/2));
-			int countRT = Core.countNonZero(blobimg.submat(rect[1], (rect[1]+rect[3])/2, (rect[0]+rect[2])/2, rect[2]));
-			int countLB = Core.countNonZero(blobimg.submat((rect[1]+rect[3])/2, rect[3], rect[0], (rect[0]+rect[2])/2));
-			int countRB = Core.countNonZero(blobimg.submat((rect[1]+rect[3])/2, rect[3], (rect[0]+rect[2])/2, rect[2]));
-						
-			if(countLT>countRT && countLT>countLB && countLT>countRB){
-				rect=new int[]{rect[0], rect[1], (rect[0]+rect[2])/2, (rect[1]+rect[3])/2};
-			}
-			else if(countRT>countLT && countRT>countLB && countRT>countRB){
-				rect=new int[]{(rect[0]+rect[2])/2, rect[1], rect[2], (rect[1]+rect[3])/2};
-			}
-			else if(countLB>countLT && countLB>countRT && countLB>countRB){
-				rect=new int[]{rect[0], (rect[1]+rect[3])/2, (rect[0]+rect[2])/2, rect[3]};
-			}
-			//all corners being equal, this will bias towards the bottom right
-			else{
-				rect=new int[]{(rect[0]+rect[2])/2, (rect[1]+rect[3])/2, rect[2], rect[3]};
-			}
-		}
+		int[] rect=findCenterOfMass(boundingbox, blobimg);
 		
 		int[] point={rect[0],rect[1]};
 		int priority=0;
@@ -116,6 +91,41 @@ public class MassDetectionandObjectPriority implements Callable<Pair<int[],Integ
 	}
 	
 	/**
+	 * do a binary search on the image in the both dimension.
+	 * Split the image into 4 parts, find the corner with the larger # of blob pixels, store that area in rect, and repeat.
+	 * When we reach 1 px width and height of the rect, we now have x,y coordinate for center of mass.
+	 * @param boundingbox 
+	 * @param blobimg 
+	 * @return 
+	 */
+	private int[] findCenterOfMass(Rect boundingbox, Mat blobimg) {
+        int[] rect={boundingbox.x,boundingbox.y,boundingbox.x+boundingbox.width,boundingbox.y+boundingbox.height};
+        
+        while(rect[3]-rect[1]>1 && rect[2]-rect[0]>1){          
+            //split image and see which corner has more blob
+            int countLT = Core.countNonZero(blobimg.submat(rect[1], (rect[1]+rect[3])/2, rect[0], (rect[0]+rect[2])/2));
+            int countRT = Core.countNonZero(blobimg.submat(rect[1], (rect[1]+rect[3])/2, (rect[0]+rect[2])/2, rect[2]));
+            int countLB = Core.countNonZero(blobimg.submat((rect[1]+rect[3])/2, rect[3], rect[0], (rect[0]+rect[2])/2));
+            int countRB = Core.countNonZero(blobimg.submat((rect[1]+rect[3])/2, rect[3], (rect[0]+rect[2])/2, rect[2]));
+                        
+            if(countLT>countRT && countLT>countLB && countLT>countRB){
+                rect=new int[]{rect[0], rect[1], (rect[0]+rect[2])/2, (rect[1]+rect[3])/2};
+            }
+            else if(countRT>countLT && countRT>countLB && countRT>countRB){
+                rect=new int[]{(rect[0]+rect[2])/2, rect[1], rect[2], (rect[1]+rect[3])/2};
+            }
+            else if(countLB>countLT && countLB>countRT && countLB>countRB){
+                rect=new int[]{rect[0], (rect[1]+rect[3])/2, (rect[0]+rect[2])/2, rect[3]};
+            }
+            //all corners being equal, this will bias towards the bottom right
+            else{
+                rect=new int[]{(rect[0]+rect[2])/2, (rect[1]+rect[3])/2, rect[2], rect[3]};
+            }
+        }
+        return rect;
+    }
+
+    /**
 	 * @param imgpointer the image
 	 * @param colorOfBlob the color of the blob
 	 * @param identification The type of blob this is, and how to classify its priority.

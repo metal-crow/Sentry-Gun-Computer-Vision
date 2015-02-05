@@ -41,9 +41,12 @@ public class Main {
 	private static ArduinoInteraction arduinoOut;
 	public static boolean foundTarget=false;
 	
-	//saftly exit loop to close program
+	//Safely exit loop to close program
     private static boolean exit=false;
 	
+    //give the application a memory. Store last know locations of objects for last 60 frames
+    public static int[][] objectPermanence=new int[60][2];
+    
     public static void main(String[] args) throws UnsupportedCommOperationException, PortInUseException, NoSuchPortException, InterruptedException, IOException {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         arduinoOut=new ArduinoInteraction();
@@ -52,9 +55,9 @@ public class Main {
     	curFrame=new Mat();
     	nextFrame=new Mat();
     	
-        //String filename="testing/movement test 2.avi";
-        //VideoCapture video = new VideoCapture(filename);
-    	VideoCapture video = new VideoCapture(0);
+        String filename="testing/movement test.avi";
+        VideoCapture video = new VideoCapture(filename);
+    	//VideoCapture video = new VideoCapture(0);
     	
         video.read(curFrame);
     	video.read(nextFrame);
@@ -85,7 +88,7 @@ public class Main {
 	        long time=System.currentTimeMillis();//DEBUGGING TIME
 	        
 	        //the target
-            Pair<int[], Integer> target=Pair.with(new int[]{}, 7);//the min priority for the laser
+            Pair<int[], Integer> target=Pair.with(new int[]{-1,-1}, 7);//the min priority for the laser
 	        
             
 	        //Green dot detection
@@ -138,11 +141,19 @@ public class Main {
         		//exclude any results with a priority < frameArea (see detectperson for how priority generation works and why this works)
         		target=null;
     	        for(Pair<int[], Integer> t:targets){
-    	            if((target==null && t.getValue1()>(curFrame.width()*curFrame.height())) || (target!=null && t.getValue1()>target.getValue1())){
+    	            if((target!=null && t.getValue1()>(curFrame.width()*curFrame.height())) || (target!=null && t.getValue1()>target.getValue1())){
     	                target=t;
     	                foundTarget=true;
     	            }
     	        }
+    		}
+    		
+
+            //remember what just happened.
+    		if(target==null){
+    		    commitObjectToMemory(new int[]{-1,-1});
+    		}else{
+    		    commitObjectToMemory(target.getValue0());
     		}
     		
     		//if we have found a target, send its coordinates to the arduino and shoot
@@ -163,7 +174,7 @@ public class Main {
 	        //DEBUG WRITING FOR TESTING
 			try {
 				panel.setImage(drawImg);
-		        Highgui.imwrite("testing/test/"+frame_count+"output.jpg",drawImg);
+		        //Highgui.imwrite("testing/test/"+frame_count+"output.jpg",drawImg);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -185,7 +196,21 @@ public class Main {
     }
     
 
-	/**Get a area in the video that is movement */
+    /**
+     * Commit the given target to memory (including no target, stored as coord -1,-1). left shift all previous memorized objects.
+     * @param target
+     */
+	private static void commitObjectToMemory(int[] target) {
+	    //leftshift old memory objects
+        for(int i=1;i<objectPermanence.length-1;i++){
+            objectPermanence[i-1]=objectPermanence[i];
+        }
+        //add new memory object
+        objectPermanence[objectPermanence.length-1]=target;
+    }
+
+
+    /**Get a area in the video that is movement */
     private static ArrayList<Pair<int[], Integer>> movementDetection() throws Exception{
     	//get the difference between the frames
     	//this is done based on http://blog.cedric.ws/opencv-simple-motion-detection
@@ -203,7 +228,7 @@ public class Main {
         Imgproc.cvtColor(frameDiff, frameDiff, Imgproc.COLOR_BGR2GRAY);
     	Imgproc.threshold(frameDiff, frameDiff, 35, 255, Imgproc.THRESH_BINARY);
     	
-		Highgui.imwrite("testing/movement/"+frame_count+"output.jpg",frameDiff);
+		//Highgui.imwrite("testing/movement/"+frame_count+"output.jpg",frameDiff);
     	
     	//now that be have the mat of movement, get each unique blob of movement in it.
     	return ImagePartitioning.BlobDetection(frameDiff,ImagePartitioning.PERSON_IDENTIFICATION);

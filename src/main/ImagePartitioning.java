@@ -37,12 +37,16 @@ public class ImagePartitioning {
 	 * @return an array containing the center of each blob, and the blob's priority
 	 * @throws Exception if the supplied priority identification type is invalid
 	 */
+	/*
+	 * NOTE:This is the primary bottleneck for the code slowdown.
+	 * Would need to make new algorithm to speed this up
+	 */
 	public static ArrayList<Pair<int[], Integer>> BlobDetection(Mat img, int identification) throws Exception{
 		if(identification<0 || identification>2){
 			throw new Exception("Invalid priority identifier.");
 		}
 		//Is a SimpleBlobDetector http://docs.opencv.org/modules/features2d/doc/common_interfaces_of_feature_detectors.html#simpleblobdetector better for this?
-    	int blobColor=100;//note:this will cause errors for >254 blobs in an image
+    	int blobColor=1;//note:this will cause errors for >254 blobs in an image
         ExecutorService executor = Executors.newCachedThreadPool();
 		ArrayList<Future<Pair<int[],Integer>>> tasks = new ArrayList<Future<Pair<int[],Integer>>>();
 
