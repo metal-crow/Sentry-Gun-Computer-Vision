@@ -3,7 +3,6 @@ Sentry-Gun-Computer-Vision
 
 Major project for CSH. Detects people for use in a sentry gun.
 
-Uses OpenCV 2.4.9 and JavaTuples.
 I have a partial C++ port written, but i am unsure if i will finish porting this.
 
 Package Info
@@ -77,3 +76,9 @@ To check for if the given blob of image contains a person, i currently perform a
 Firstly, i use a cascade classifier to check for a face in either frontal or profile view. This, obviously, has the most impact on the likelihood this is a person. If a face is found, the likelihood is returned as double the total area of the frame.  
 Secondly, i check for any color values in the range of human skin. If a non-insignificant amount is found (width*3 at min), the likelihood is returned as the total frame area + the area of found skin.  
 Finally, if nothing else is found, the area of the blob or the fragment is returned.   
+
+Libraries
+=========
+RXTX binary builds provided by Mfizz Inc. (http://mfizz.com/). Please see http://mfizz.com/oss/rxtx-for-java for more info.  
+JavaTuples  
+OpenCV 2.4.9  
