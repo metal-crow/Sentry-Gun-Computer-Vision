@@ -8,12 +8,15 @@ I have a partial C++ port written, but i am unsure if i will finish porting this
 
 ToDo (in order)
 ==========================
-1. Add object permanence, memory for objects   
-2. Handle turret not shooting at its own bullet  
-3. Make it faster per frame (currently 1 order of magnitude too slow for 60fops)  
-4. Work on improving person detection algorithms  
-5. Fix nerf gun being not in exact center on hardware  
-6. Add controls and gui for the user  
+* MOVEMENT SMOOTHING. Use memory to smoothly transiton between target points, no jittering.  
+* Add object permanence, memory for objects   
+* Handle turret not shooting at its own bullet  
+* Make it faster per frame (currently 1 order of magnitude too slow for 60fops)  
+* Work on improving person detection algorithms  
+* Hardware General  
+	a) Fix nerf gun being not in exact center on hardware  
+	b) Shoddy build quality, entire platform is tilting.  
+* Add controls and gui for the user  
 
 Design
 ==========================

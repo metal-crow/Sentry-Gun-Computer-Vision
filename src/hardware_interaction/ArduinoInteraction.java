@@ -20,7 +20,7 @@ public class ArduinoInteraction {
     //I get distortion at screen edges. This is dependent on fov of camera. Need this to recalculate.
 	//private static final int cameraFOV=90;
 	private static final int xFOV=120;
-	private static final int yFOV=75;
+	private static final int yFOV=60;
 	
     private static final int TIME_OUT = 1000; // Port open timeout
     private static final int DATA_RATE = 9600; // Arduino serial port
@@ -52,16 +52,15 @@ public class ArduinoInteraction {
     	//convert the screen positions to an angle from 0 to 180 for correct angle for servo
         int screenXPos=(point[0]*xFOV)/imgWidth;
         
-        //x angle has to be reversed because it is attached to base
+        //angle has to be reversed because it is attached to base
         screenXPos=Math.abs(screenXPos-xFOV);
         
         System.out.println("servo X"+screenXPos);
         arduinoOut.write(new Integer(screenXPos).byteValue());
         
         
-        
         int screenYPos=(point[1]*yFOV)/imgHeight;
-    	
+        screenYPos=Math.abs(screenYPos-yFOV);
 		System.out.println("servo Y"+screenYPos);
 		arduinoOut.write(new Integer(screenYPos).byteValue());
     }
@@ -83,12 +82,19 @@ public class ArduinoInteraction {
     }
     
     public void close(){
+        //reset to center state
+        try {
+            arduinoScreenPositiontoAngle(new int[]{50,50}, 100,100);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        flush();
     	serialPort.close();
     }
     
     public static void main(String[] args) throws UnsupportedCommOperationException, PortInUseException, NoSuchPortException, InterruptedException, IOException {
         ArduinoInteraction a=new ArduinoInteraction();
-        a.arduinoScreenPositiontoAngle(new int[]{100,50}, 100,100);
+        a.arduinoScreenPositiontoAngle(new int[]{50,50}, 100,100);
         a.flush();
         a.close();
     }

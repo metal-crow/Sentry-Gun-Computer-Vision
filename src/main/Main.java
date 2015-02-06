@@ -55,9 +55,9 @@ public class Main {
     	curFrame=new Mat();
     	nextFrame=new Mat();
     	
-        String filename="testing/movement test.avi";
-        VideoCapture video = new VideoCapture(filename);
-    	//VideoCapture video = new VideoCapture(0);
+        //String filename="testing/movement test.avi";
+        //VideoCapture video = new VideoCapture(filename);
+    	VideoCapture video = new VideoCapture(0);
     	
         video.read(curFrame);
     	video.read(nextFrame);
@@ -174,7 +174,7 @@ public class Main {
 	        //DEBUG WRITING FOR TESTING
 			try {
 				panel.setImage(drawImg);
-		        //Highgui.imwrite("testing/test/"+frame_count+"output.jpg",drawImg);
+		        Highgui.imwrite("testing/test/"+frame_count+"output.jpg",drawImg);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
