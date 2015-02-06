@@ -1,4 +1,4 @@
-package main;
+package preprocessing;
 
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
@@ -7,11 +7,15 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import main.Main;
+
 import org.javatuples.Pair;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
+
+import processing.MassDetectionandObjectPriority;
 
 public class ImagePartitioning {
 	

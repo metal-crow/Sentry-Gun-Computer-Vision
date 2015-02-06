@@ -1,4 +1,4 @@
-package hardware_interaction;
+package linking;
 
 import gnu.io.CommPortIdentifier;
 import gnu.io.NoSuchPortException;

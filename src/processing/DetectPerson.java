@@ -1,4 +1,4 @@
-package person_identification;
+package processing;
 
 import main.Main;
 

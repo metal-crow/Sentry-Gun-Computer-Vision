@@ -2,7 +2,6 @@ package main;
 import gnu.io.NoSuchPortException;
 import gnu.io.PortInUseException;
 import gnu.io.UnsupportedCommOperationException;
-import hardware_interaction.ArduinoInteraction;
 
 import java.awt.event.WindowAdapter;
 import java.io.IOException;
@@ -10,6 +9,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import javax.swing.JFrame;
+
+import linking.ArduinoInteraction;
+import linking.RealTime_Video_Showing;
 
 import org.javatuples.Pair;
 import org.opencv.core.Core;
@@ -21,7 +23,7 @@ import org.opencv.highgui.Highgui;
 import org.opencv.highgui.VideoCapture;
 import org.opencv.imgproc.Imgproc;
 
-import user_view.RealTime_Video_Showing;
+import preprocessing.ImagePartitioning;
  
 /**
  * Class that only have movement detection and laser detection capacities

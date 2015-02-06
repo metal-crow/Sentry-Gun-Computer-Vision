@@ -1,9 +1,11 @@
-package main;
+package processing;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
+
+import main.Main;
 
 import org.javatuples.Pair;
 import org.opencv.core.Core;
@@ -17,7 +19,7 @@ import org.opencv.core.Scalar;
 import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
 
-import person_identification.DetectPerson;
+import preprocessing.ImagePartitioning;
 
 /**
  * Given an image containing a blob, and its color, find its center of mass.

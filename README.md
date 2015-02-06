@@ -6,6 +6,23 @@ Major project for CSH. Detects people for use in a sentry gun.
 Uses OpenCV 2.4.9 and JavaTuples.
 I have a partial C++ port written, but i am unsure if i will finish porting this.
 
+Package Info
+------------
+main  
+The main method and thread  
+  
+PreProcessing  
+anything that occurs to the image before analysis of it  
+  
+Processing  
+Analysis of the image  
+  
+PostProcessing  
+Anything after the image is analyzed that uses the results from image analysis  
+  
+Linking  
+The interaction between the main program and external objects. Hardware for example.  
+  
 ToDo (in order)
 ==========================
 * MOVEMENT SMOOTHING. Use memory to smoothly transiton between target points, no jittering.  
@@ -14,8 +31,7 @@ ToDo (in order)
 * Make it faster per frame (currently 1 order of magnitude too slow for 60fops)  
 * Work on improving person detection algorithms  
 * Hardware General  
-	a) Fix nerf gun being not in exact center on hardware  
-	b) Shoddy build quality, entire platform is tilting.  
+	a) Shoddy connection between x servo and base, entire platform is tilting.  
 * Add controls and gui for the user  
 
 Design
