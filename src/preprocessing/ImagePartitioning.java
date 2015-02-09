@@ -119,6 +119,9 @@ public class ImagePartitioning {
 	    //truncating in worst case looses a pixel for each edge fragment
         int fragmentWidth=(img.width()-1)/fragments;
         int fragmentHeight=(img.height()-1)/fragments;
+        //need to give each thread a unique starting color
+        int colorincrement=256/(((int) Math.pow(fragments,2))-1);
+        int curcolor=1;
         
         int y=0;
         while(y+fragmentHeight<img.height()){
@@ -126,9 +129,10 @@ public class ImagePartitioning {
             while(x+fragmentWidth<img.width()){
                 //>OpenCV   >Rows are actually collums
                 Mat fragment=img.submat(y, y+fragmentHeight, x, x+fragmentWidth);
-                Callable<ArrayList<Pair<int[],Integer>>> thread =new GetDiscreteBlobsFromFragments(fragment,y,x,identification,img);
+                Callable<ArrayList<Pair<int[],Integer>>> thread =new GetDiscreteBlobsFromFragments(fragment,y,x,identification,img,curcolor);
                 tasks.add(executor.submit(thread));
                 x+=fragmentWidth;
+                curcolor+=colorincrement;
             }
             y+=fragmentHeight;
         }

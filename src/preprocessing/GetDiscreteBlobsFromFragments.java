@@ -22,13 +22,16 @@ public class GetDiscreteBlobsFromFragments implements Callable<ArrayList<Pair<in
 	private int offsety;
 	private int identification;
 	private Mat fullImg;//this is used to syncronize threads on
+	//this is needed because massdetec thread relies on unique colors to differentiate blobs. Poses problem if two threads color in different blobs same color
+    private int startingcolor;
 	
-	public GetDiscreteBlobsFromFragments(Mat fragment,int offsety, int offsetx, int identification, Mat fullImg) {
+	public GetDiscreteBlobsFromFragments(Mat fragment,int offsety, int offsetx, int identification, Mat fullImg, int startingcolor) {
 		this.fragment=fragment;
 		this.offsetx = offsetx;
 		this.offsety=offsety;
 		this.identification = identification;
 		this.fullImg = fullImg;
+        this.startingcolor = startingcolor;
 	}
 
 	@Override
@@ -37,18 +40,17 @@ public class GetDiscreteBlobsFromFragments implements Callable<ArrayList<Pair<in
 	    ArrayList<Future<Pair<int[],Integer>>> tasks = new ArrayList<Future<Pair<int[],Integer>>>();
 
 		//go through the fragment and find the blobs in it
-		int color=1;
 		for(int y=0;y<fragment.height();y++){
 			for(int x=0;x<fragment.width();x++){
 				//if we find a white pixel
 				if(fragment.get(y,x)[0]==255){
 					//floodfill it, and give the fragment and the blobs color to a massdet thread
 					synchronized (fullImg) {
-						Imgproc.floodFill(fragment, new Mat(), new Point(x,y), new Scalar(color));
+						Imgproc.floodFill(fragment, new Mat(), new Point(x,y), new Scalar(startingcolor));
 					}
-	                Callable<Pair<int[],Integer>> thread =new MassDetectionandObjectPriority(fragment,color,identification);
+	                Callable<Pair<int[],Integer>> thread =new MassDetectionandObjectPriority(fragment,startingcolor,identification);
 	                tasks.add(executor.submit(thread));
-	                color++;
+	                startingcolor++;
 				}
 			}
 		}
