@@ -5,13 +5,16 @@ Major project for CSH. Detects people for use in a sentry gun.
 
 I have a partial C++ port written, but i am unsure if i will finish porting this.
 
+NOTES:
+grid based detection? Inaccuate, fast, scalable. Split image into grid, thread each, find grid with most movement. Target.
+
 Package Info
 ------------
 main  
 The main method and thread  
   
 PreProcessing  
-anything that occurs to the image before analysis of it  
+anything that occurs to the image before analysis of the image  
   
 Processing  
 Analysis of the image  

@@ -23,6 +23,8 @@ import org.opencv.highgui.Highgui;
 import org.opencv.highgui.VideoCapture;
 import org.opencv.imgproc.Imgproc;
 
+import postprocessing.Memory;
+import postprocessing.MovementSmoothing;
 import preprocessing.ImagePartitioning;
  
 /**
@@ -57,9 +59,9 @@ public class Main {
     	curFrame=new Mat();
     	nextFrame=new Mat();
     	
-        //String filename="testing/movement test.avi";
-        //VideoCapture video = new VideoCapture(filename);
-    	VideoCapture video = new VideoCapture(0);
+        String filename="testing/movement test.avi";
+        VideoCapture video = new VideoCapture(filename);
+    	//VideoCapture video = new VideoCapture(0);
     	
         video.read(curFrame);
     	video.read(nextFrame);
@@ -114,7 +116,7 @@ public class Main {
         	//movement detection
     		ArrayList<Pair<int[], Integer>> targets = null;
 			try {
-				targets = movementDetection();
+			    targets = movementDetection();
 			} catch (Exception e1) {
 				System.err.println("Movement error");
 				e1.printStackTrace();
@@ -138,7 +140,7 @@ public class Main {
     		//edge case where the first couple of frames are empty
     		if(!foundTarget && Main.curFrame.width()!=0){
     		    System.out.println("At rest");//DEBUGGING
-        		targets = ImagePartitioning.FragmentationSplitting(16);
+        		targets = ImagePartitioning.FragmentationSplitting(curFrame,16,ImagePartitioning.PERSON_IDENTIFICATION);
         		//if none of these results have detected a face or skin, they will return the size of their fragment as priority
         		//exclude any results with a priority < frameArea (see detectperson for how priority generation works and why this works)
         		target=null;
@@ -153,13 +155,14 @@ public class Main {
 
             //remember what just happened.
     		if(target==null){
-    		    commitObjectToMemory(new int[]{-1,-1});
+    		    Memory.commitObjectToMemory(new int[]{-1,-1}, objectPermanence);
     		}else{
-    		    commitObjectToMemory(target.getValue0());
+    		    Memory.commitObjectToMemory(target.getValue0(), objectPermanence);
     		}
     		
     		//if we have found a target, send its coordinates to the arduino and shoot
     		if(foundTarget){
+    		    //MovementSmoothing.smoothTarget(objectPermanence,target.getValue0());
     		    try{
                     System.out.println("Target coord: "+Arrays.toString(target.getValue0()));//DEBUGGING
                     arduinoOut.arduinoScreenPositiontoAngle(target.getValue0(),curFrame.width(),curFrame.height());
@@ -197,22 +200,9 @@ public class Main {
         Thread.sleep(2000);
     }
     
-
     /**
-     * Commit the given target to memory (including no target, stored as coord -1,-1). left shift all previous memorized objects.
-     * @param target
+     * Get a area in the video that is movement
      */
-	private static void commitObjectToMemory(int[] target) {
-	    //leftshift old memory objects
-        for(int i=1;i<objectPermanence.length-1;i++){
-            objectPermanence[i-1]=objectPermanence[i];
-        }
-        //add new memory object
-        objectPermanence[objectPermanence.length-1]=target;
-    }
-
-
-    /**Get a area in the video that is movement */
     private static ArrayList<Pair<int[], Integer>> movementDetection() throws Exception{
     	//get the difference between the frames
     	//this is done based on http://blog.cedric.ws/opencv-simple-motion-detection
@@ -230,10 +220,10 @@ public class Main {
         Imgproc.cvtColor(frameDiff, frameDiff, Imgproc.COLOR_BGR2GRAY);
     	Imgproc.threshold(frameDiff, frameDiff, 35, 255, Imgproc.THRESH_BINARY);
     	
-		//Highgui.imwrite("testing/movement/"+frame_count+"output.jpg",frameDiff);
+		Highgui.imwrite("testing/movement/"+frame_count+"output.jpg",frameDiff);
     	
     	//now that be have the mat of movement, get each unique blob of movement in it.
-    	return ImagePartitioning.BlobDetection(frameDiff,ImagePartitioning.PERSON_IDENTIFICATION);
+    	return ImagePartitioning.OutlineBlobDetection(frameDiff,ImagePartitioning.PERSON_IDENTIFICATION);
     }
     
     /** find green dot in image */
@@ -248,6 +238,6 @@ public class Main {
         
         //Highgui.imwrite("testing/laser/"+frame_count+"output LZ.jpg",hsv_channel);
         
-        return ImagePartitioning.BlobDetection(laser_binary_channels.get(laser_binary_channels.size()-1),ImagePartitioning.LASER_IDENTIFICATION);
+        return ImagePartitioning.FragmentationSplitting(laser_binary_channels.get(laser_binary_channels.size()-1),4,ImagePartitioning.LASER_IDENTIFICATION);
     }
 }
