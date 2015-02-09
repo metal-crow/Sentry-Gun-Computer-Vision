@@ -69,8 +69,11 @@ public class MassDetectionandObjectPriority implements Callable<Pair<int[],Integ
             MatOfPoint2f peremeter = new MatOfPoint2f();
             contours.get(0).convertTo(peremeter, CvType.CV_32FC2);
             
-            double circularity=4*Math.PI*blobArea/Math.pow(Imgproc.arcLength(peremeter,true),2);
-            
+            int arcLength=(int) Imgproc.arcLength(peremeter,true);
+            double circularity=0;
+            if(arcLength>0){
+            	circularity=4*Math.PI*blobArea/Math.pow(arcLength,2);
+            }
             //convert both to a ranking mechanism for the likelihood this is a laser point
             priority=(int) ((density*circularity)*100);
             //System.out.println("laser density "+density+" laser circularity "+circularity);//DEBUGGING
