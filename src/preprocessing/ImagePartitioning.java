@@ -122,12 +122,18 @@ public class ImagePartitioning {
             Rect blobbound=Imgproc.boundingRect(points);
             if(blobbound.width*blobbound.height>minBlobArea){
                 //find a point in the blob and floodfill it
-                for(int y=blobbound.y;y<blobbound.y+blobbound.height;y++){
-                    for(int x=blobbound.x;x<blobbound.y+blobbound.width;x++){
+                boolean esc=false;
+                int y=blobbound.y;
+                while(y<blobbound.y+blobbound.height && !esc){
+                    int x=blobbound.x;
+                    while(x<blobbound.y+blobbound.width && !esc){
                         if(img.get(y, x)[0]==255){
                             Imgproc.floodFill(img, new Mat(), new Point(x,y), new Scalar(color));
+                            esc=true;
                         }
+                        x++;
                     }
+                    y++;
                 }
                 
                 //give this blob to a thread
