@@ -1,7 +1,6 @@
 package preprocessing;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -10,13 +9,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.javatuples.Pair;
-import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
-import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
 
 import processing.MassDetectionandObjectPriority;
@@ -107,15 +104,54 @@ public class ImagePartitioning {
 	    return targets;
     }
 	
-	public static void main2(String[] args) {
-	    System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-	    Mat img=Highgui.imread("testing/movement/1output.jpg",0);
-	    ArrayList<Pair<int[], Integer>> t=OutlineBlobDetection(img,0);
-	    for(Pair<int[], Integer> a:t){
-	        System.out.println(Arrays.toString(a.getValue0()));
-	    }
-	    Highgui.imwrite("testing/out.png", img);
-    }
+	/**
+	 * Find blobs in image without outline detection use. For laser detection.
+	 * @param img
+	 * @param identification
+	 * @return
+	 */
+	public static ArrayList<Pair<int[], Integer>> BasicBlobDetection(Mat img, int identification){
+        List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
+        Imgproc.findContours(img.clone(), contours, new Mat(), Imgproc.RETR_EXTERNAL , Imgproc.CHAIN_APPROX_NONE);
+        
+        ExecutorService executor = Executors.newCachedThreadPool();
+        ArrayList<Future<Pair<int[], Integer>>> tasks = new ArrayList<Future<Pair<int[], Integer>>>();
+        
+        int color=1;
+        for(MatOfPoint points:contours){
+            Rect blobbound=Imgproc.boundingRect(points);
+            if(blobbound.width*blobbound.height>minBlobArea){
+                //find a point in the blob and floodfill it
+                for(int y=blobbound.y;y<blobbound.y+blobbound.height;y++){
+                    for(int x=blobbound.x;x<blobbound.y+blobbound.width;x++){
+                        if(img.get(y, x)[0]==255){
+                            Imgproc.floodFill(img, new Mat(), new Point(x,y), new Scalar(color));
+                        }
+                    }
+                }
+                
+                //give this blob to a thread
+                MassDetectionandObjectPriority thread= new MassDetectionandObjectPriority(img, color, identification);
+                tasks.add(executor.submit(thread));
+                
+                color++;
+            }
+        }
+        
+        //get the results of the threads
+        executor.shutdown();
+        ArrayList<Pair<int[], Integer>> targets=new ArrayList<Pair<int[], Integer>>(tasks.size());
+        for(Future<Pair<int[],Integer>> task:tasks){
+            try {
+                targets.add(task.get());
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+            }
+        }
+        //return threads results
+        return targets;
+	}
+	
 	
 	/**
 	 * Fragment the image, give each fragment to a thread to run at rest detection on it
@@ -124,21 +160,22 @@ public class ImagePartitioning {
 	 * @param identification 
 	 * @return 
 	 */
-	//TODO + fix all in main
-	public static ArrayList<Pair<int[], Integer>> FragmentationSplitting(Mat img, int fragments, int identification){
+	public static ArrayList<Pair<int[], Integer>> FragmentationSplitting(Mat img, int fragments){
 	    ExecutorService executor = Executors.newFixedThreadPool((int) Math.pow(fragments,2));
 	    ArrayList<Future<Pair<int[],Integer>>> tasks = new ArrayList<Future<Pair<int[],Integer>>>((int) Math.pow(fragments,2));
 	    
 	    //truncating in worst case looses a pixel for each edge fragment
-        int fragmentWidth=img.width()/fragments;
-        int fragmentHeight=img.height()/fragments;
+        int fragmentWidth=(img.width()-1)/fragments;
+        int fragmentHeight=(img.height()-1)/fragments;
         
         int y=0;
-        while(y+fragmentHeight<=img.height()){
+        while(y+fragmentHeight<img.height()){
             int x=0;
-            while(x+fragmentWidth<=img.width()){
-                Mat test=img.submat(x, x+fragmentWidth, y, y+fragmentHeight);
-                Callable<Pair<int[],Integer>> thread=new MassDetectionandObjectPriority(y,x,test);
+            while(x+fragmentWidth<img.width()){
+                //>OpenCV   >Rows are actually collums
+                Mat fragment=img.submat(y, y+fragmentHeight, x, x+fragmentWidth);
+                //need this to be compatible with laser detection and at rest person detection
+                Callable<Pair<int[],Integer>> thread=new MassDetectionandObjectPriority(y,x,fragment);
                 tasks.add(executor.submit(thread));
                 
                 x+=fragmentWidth;
@@ -157,15 +194,5 @@ public class ImagePartitioning {
         }
         return targets;
 	}
-	
-	public static void main(String[] args) {
-	    System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-	    Mat img=Highgui.imread("testing/face1.jpg");
-        ArrayList<Pair<int[], Integer>> t=FragmentationSplitting(img,4,2);
-        for(Pair<int[], Integer> a:t){
-            System.out.println(Arrays.toString(a.getValue0()));
-        }
-        Highgui.imwrite("testing/out.png", img);
-    }
 
 }

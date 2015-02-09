@@ -140,7 +140,7 @@ public class Main {
     		//edge case where the first couple of frames are empty
     		if(!foundTarget && Main.curFrame.width()!=0){
     		    System.out.println("At rest");//DEBUGGING
-        		targets = ImagePartitioning.FragmentationSplitting(curFrame,16,ImagePartitioning.PERSON_IDENTIFICATION);
+        		targets = ImagePartitioning.FragmentationSplitting(curFrame,4);
         		//if none of these results have detected a face or skin, they will return the size of their fragment as priority
         		//exclude any results with a priority < frameArea (see detectperson for how priority generation works and why this works)
         		target=null;
@@ -238,6 +238,6 @@ public class Main {
         
         //Highgui.imwrite("testing/laser/"+frame_count+"output LZ.jpg",hsv_channel);
         
-        return ImagePartitioning.FragmentationSplitting(laser_binary_channels.get(laser_binary_channels.size()-1),4,ImagePartitioning.LASER_IDENTIFICATION);
+        return ImagePartitioning.BasicBlobDetection(laser_binary_channels.get(laser_binary_channels.size()-1),ImagePartitioning.LASER_IDENTIFICATION);
     }
 }
