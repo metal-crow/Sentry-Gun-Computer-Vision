@@ -1,7 +1,5 @@
 package processing;
 
-import main.Main;
-
 import org.javatuples.Pair;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
@@ -29,9 +27,9 @@ public class DetectPerson {
      * large blob no detection >
      * small blob no detection
      */
-    public static int isBlobHuman(Mat img){
+    public static int isBlobHuman(Mat img, int totalWidth, int totalHeight){
         int blobArea=img.width()*img.height();
-        int frameArea=Main.curFrame.width()*Main.curFrame.height();
+        int frameArea=totalWidth*totalHeight;
         
         //first check if we can find a face in this blob. If so, we have a guaranteed person.
         //the priority must be > than 2 things, so add the maximum 2 times 
