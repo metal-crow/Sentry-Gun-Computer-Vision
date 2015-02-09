@@ -9,13 +9,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.javatuples.Pair;
-import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
-import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
 
 import processing.MassDetectionandObjectPriority;
@@ -107,16 +105,53 @@ public class ImagePartitioning {
     }
 	
 	/**
-	 * Fragment the image, give each fragment to a thread
+	 * Basic discrete blob detection. Fragment the image and give each fragment to a thread.
+	 * The thread will go through the image, when we find a white pixel floodfill the blob, and give it to a massdetection thread.
+	 * Yes i know this is a lot of code repeat from FragmentationSplitting, this is easier than figuring out how to combine the two methods.
+	 * @param img
+	 * @param identification
+	 * @return
+	 */
+	public static ArrayList<Pair<int[], Integer>> BasicBlobDetection(Mat img, int fragments, int identification){
+		ExecutorService executor = Executors.newFixedThreadPool((int) Math.pow(fragments,2));
+	    ArrayList<Future<ArrayList<Pair<int[],Integer>>>> tasks = new ArrayList<Future<ArrayList<Pair<int[],Integer>>>>((int) Math.pow(fragments,2));
+	    
+	    //truncating in worst case looses a pixel for each edge fragment
+        int fragmentWidth=(img.width()-1)/fragments;
+        int fragmentHeight=(img.height()-1)/fragments;
+        
+        int y=0;
+        while(y+fragmentHeight<img.height()){
+            int x=0;
+            while(x+fragmentWidth<img.width()){
+                //>OpenCV   >Rows are actually collums
+                Mat fragment=img.submat(y, y+fragmentHeight, x, x+fragmentWidth);
+                Callable<ArrayList<Pair<int[],Integer>>> thread =new GetDiscreteBlobsFromFragments(fragment,y,x,identification,img);
+                tasks.add(executor.submit(thread));
+                x+=fragmentWidth;
+            }
+            y+=fragmentHeight;
+        }
+        
+        executor.shutdown();
+        ArrayList<Pair<int[], Integer>> targets=new ArrayList<Pair<int[], Integer>>(tasks.size());
+        for(Future<ArrayList<Pair<int[],Integer>>> task:tasks){
+            try {
+                    targets.addAll(task.get());
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+            }
+        }
+        return targets;
+	}
+	
+	/**
+	 * Fragment the image, give each fragment to a thread for at rest detection
 	 * @param img the current frame (the normal color one)
 	 * @param fragments The square root of whatever number of fragments you want.
-	 * @param identification <p>if this is for the laser, we give each fragment to a thread.
-	 * The thread returns the points of blobs in its fragment, 
-     * and each point is floodfilled and given to a MassDetectionandObjectPriority thread</p>
-     * <p>Otherwise, the fragment is directly given to MassDetectionandObjectPriority, for at rest detection</p>
 	 * @return 
 	 */
-	public static ArrayList<Pair<int[], Integer>> FragmentationSplitting(Mat img, int fragments, int identification){
+	public static ArrayList<Pair<int[], Integer>> FragmentationSplitting(Mat img, int fragments){
 	    ExecutorService executor = Executors.newFixedThreadPool((int) Math.pow(fragments,2));
 	    ArrayList<Future<Pair<int[],Integer>>> tasks = new ArrayList<Future<Pair<int[],Integer>>>((int) Math.pow(fragments,2));
 	    
@@ -130,13 +165,7 @@ public class ImagePartitioning {
             while(x+fragmentWidth<img.width()){
                 //>OpenCV   >Rows are actually collums
                 Mat fragment=img.submat(y, y+fragmentHeight, x, x+fragmentWidth);
-                //need this to be compatible with laser detection and at rest person detection
-                Callable<Pair<int[],Integer>> thread = null;
-                if(identification==LASER_IDENTIFICATION){
-                    thread=new GetDiscreteBlobsFromFragments(fragment);
-                }else{
-                    thread=new MassDetectionandObjectPriority(y,x,fragment);
-                }
+                Callable<Pair<int[],Integer>> thread =new MassDetectionandObjectPriority(y,x,fragment);
                 tasks.add(executor.submit(thread));
                 x+=fragmentWidth;
             }

@@ -238,6 +238,6 @@ public class Main {
         
         //Highgui.imwrite("testing/laser/"+frame_count+"output LZ.jpg",hsv_channel);
         
-        return ImagePartitioning.BasicBlobDetection(laser_binary_channels.get(laser_binary_channels.size()-1),ImagePartitioning.LASER_IDENTIFICATION);
+        return ImagePartitioning.BasicBlobDetection(laser_binary_channels.get(laser_binary_channels.size()-1),4,ImagePartitioning.LASER_IDENTIFICATION);
     }
 }

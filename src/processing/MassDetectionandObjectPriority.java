@@ -143,6 +143,8 @@ public class MassDetectionandObjectPriority implements Callable<Pair<int[],Integ
 	/**
 	 * Use this constructor if the image should only be put through DetectPerson. Use for the full color at rest detection, when we dont have a binary mat.
 	 * @param img
+	 * @param x the x offset for the fragment image
+	 * @param y ^
 	 */
 	public MassDetectionandObjectPriority(int y, int x, Mat img) {
 		this.img=img;
