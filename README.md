@@ -28,9 +28,9 @@ The interaction between the main program and external objects. Hardware for exam
 ToDo (in order)
 ==========================
 * MOVEMENT SMOOTHING. Use memory to smoothly transiton between target points, no jittering.  
+* Improve outline generation.  
 * Add object permanence, memory for objects   
 * Handle turret not shooting at its own bullet  
-* Make it faster per frame (currently 1 order of magnitude too slow for 60fops)  
 * Work on improving person detection algorithms  
 * Hardware General  
 	a) Shoddy connection between x servo and base, entire platform is tilting.  

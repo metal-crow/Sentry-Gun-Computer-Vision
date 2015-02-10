@@ -46,62 +46,74 @@ public class ImagePartitioning {
 	        }
 	    }
 	    
-	    ExecutorService executor = Executors.newFixedThreadPool(blobs.size());
-	    ArrayList<Future<int[]>> tasks = new ArrayList<Future<int[]>>(blobs.size());
-	    
-	    //pass each starting blob and the rest of the blobs to a thread. 1 thread for every starting blob and potential outline
-	    for(int i=0;i<blobs.size();i++){
-	        @SuppressWarnings("unchecked")
-            GenerateBlobFromOutline t=new GenerateBlobFromOutline(i, (ArrayList<Rect>)blobs.clone(),img);
-	        tasks.add(executor.submit(t));
+	    //need a catch in case we dont find any blobs
+	    if(blobs.isEmpty()){
+	        return new ArrayList<Pair<int[], Integer>>();
 	    }
-	    
-	    ArrayList<int[]> blobsFromOutlinespreDup = new ArrayList<int[]>();
-	    
-        //join the threads
-	    executor.shutdown();
-	    for(Future<int[]> t:tasks){
-	        try {
-	            blobsFromOutlinespreDup.add(t.get());
-            } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
+	    else{
+    	    ExecutorService executor = Executors.newFixedThreadPool(blobs.size());
+    	    ArrayList<Future<int[]>> tasks = new ArrayList<Future<int[]>>(blobs.size());
+    	    
+    	    //pass each starting blob and the rest of the blobs to a thread. 1 thread for every starting blob and potential outline
+    	    for(int i=0;i<blobs.size();i++){
+    	        @SuppressWarnings("unchecked")
+                GenerateBlobFromOutline t=new GenerateBlobFromOutline(i, (ArrayList<Rect>)blobs.clone(),img);
+    	        tasks.add(executor.submit(t));
+    	    }
+    	    
+    	    ArrayList<int[]> blobsFromOutlinespreDup = new ArrayList<int[]>();
+    	    
+            //join the threads
+    	    executor.shutdown();
+    	    for(Future<int[]> t:tasks){
+    	        try {
+    	            blobsFromOutlinespreDup.add(t.get());
+                } catch (InterruptedException | ExecutionException e) {
+                    e.printStackTrace();
+                }
+    	    }
+    	    
+    	    //get rid of duplicate blob outlines (have to do this after all threads are finished to prevent thread collisions)
+    	    ArrayList<int[]> blobsFromOutlines = new ArrayList<int[]>();
+    	    int color=7;//FIXME only works at this color and above. Probably important to find out why.
+    	    for(int[] startPointforOutlineBlob:blobsFromOutlinespreDup){
+                //check to make sure this point is in white space
+                if(img.get(startPointforOutlineBlob[1], startPointforOutlineBlob[0])[0]==255){
+                    //avoid duplicates by floodfilling this blob so that other points in the same blob wont be in white space
+                    Imgproc.floodFill(img, new Mat(), new Point(startPointforOutlineBlob[0],startPointforOutlineBlob[1]), new Scalar(color));
+                    color++;
+                    blobsFromOutlines.add(startPointforOutlineBlob);
+                }
+    	    }
+    	    
+    	    //need this catch in case ... something happens and the blobs we put into outline generation dont return an outline
+    	    if(blobsFromOutlines.isEmpty()){
+                return new ArrayList<Pair<int[], Integer>>();
+            }
+            else{
+        	    //pass each blob location and the mat to MassDetectionandObjectPriority thread 
+        	    ExecutorService executorMSOPP = Executors.newFixedThreadPool(blobsFromOutlines.size());
+        	    ArrayList<Future<Pair<int[],Integer>>> tasksMSOP = new ArrayList<Future<Pair<int[],Integer>>>(blobsFromOutlines.size());
+        	    
+        	    for(int[] point:blobsFromOutlines){
+        	        Callable<Pair<int[],Integer>> thread=new MassDetectionandObjectPriority(img, (int)img.get(point[1], point[0])[0], identification);
+        	        tasksMSOP.add(executorMSOPP.submit(thread));
+        	    }
+        	    
+        	    //get the results of the threads
+        	    executorMSOPP.shutdown();
+        	    ArrayList<Pair<int[], Integer>> targets=new ArrayList<Pair<int[], Integer>>(tasksMSOP.size());
+        	    for(Future<Pair<int[],Integer>> task:tasksMSOP){
+        	        try {
+        	            targets.add(task.get());
+        	        } catch (InterruptedException | ExecutionException e) {
+        	            e.printStackTrace();
+        	        }
+        	    }
+        	    //return threads results
+        	    return targets;
             }
 	    }
-	    
-	    //get rid of duplicate blob outlines (have to do this after all threads are finished to prevent thread collisions)
-	    ArrayList<int[]> blobsFromOutlines = new ArrayList<int[]>();
-	    int color=7;//FIXME only works at this color and above. Probably important to find out why.
-	    for(int[] startPointforOutlineBlob:blobsFromOutlinespreDup){
-            //check to make sure this point is in white space
-            if(img.get(startPointforOutlineBlob[1], startPointforOutlineBlob[0])[0]==255){
-                //avoid duplicates by floodfilling this blob so that other points in the same blob wont be in white space
-                Imgproc.floodFill(img, new Mat(), new Point(startPointforOutlineBlob[0],startPointforOutlineBlob[1]), new Scalar(color));
-                color++;
-                blobsFromOutlines.add(startPointforOutlineBlob);
-            }
-	    }
-	    
-	    //pass each blob location and the mat to MassDetectionandObjectPriority thread 
-	    ExecutorService executorMSOPP = Executors.newFixedThreadPool(blobsFromOutlines.size());
-	    ArrayList<Future<Pair<int[],Integer>>> tasksMSOP = new ArrayList<Future<Pair<int[],Integer>>>(blobsFromOutlines.size());
-	    
-	    for(int[] point:blobsFromOutlines){
-	        Callable<Pair<int[],Integer>> thread=new MassDetectionandObjectPriority(img, (int)img.get(point[1], point[0])[0], identification);
-	        tasksMSOP.add(executorMSOPP.submit(thread));
-	    }
-	    
-	    //get the results of the threads
-	    executorMSOPP.shutdown();
-	    ArrayList<Pair<int[], Integer>> targets=new ArrayList<Pair<int[], Integer>>(tasksMSOP.size());
-	    for(Future<Pair<int[],Integer>> task:tasksMSOP){
-	        try {
-	            targets.add(task.get());
-	        } catch (InterruptedException | ExecutionException e) {
-	            e.printStackTrace();
-	        }
-	    }
-	    //return threads results
-	    return targets;
     }
 	
 	/**
@@ -120,7 +132,7 @@ public class ImagePartitioning {
         int fragmentWidth=(img.width()-1)/fragments;
         int fragmentHeight=(img.height()-1)/fragments;
         //need to give each thread a unique starting color
-        int colorincrement=256/(((int) Math.pow(fragments,2))-1);
+        int colorincrement=256/(((int) Math.pow(fragments,2))+1);
         int curcolor=1;
         
         int y=0;

@@ -74,7 +74,7 @@ public class GenerateBlobFromOutline implements Callable<int[]>{
      * @param outline
      */
     private void fillOutlineOfPoints(ArrayList<Point> outline){
-        do{
+        while(outline.size()>2){
             //find current highest point at this time
             Point topPoint = outline.get(0);
             for(Point p:outline){
@@ -103,7 +103,7 @@ public class GenerateBlobFromOutline implements Callable<int[]>{
             synchronized (img) {
                 Core.fillConvexPoly(img, new MatOfPoint(topPoint,twoLowerPoints[0],twoLowerPoints[1]), new Scalar(255));
             }
-        }while(outline.size()>2);
+        }
     }
     
     /**

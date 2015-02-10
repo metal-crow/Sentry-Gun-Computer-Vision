@@ -220,10 +220,12 @@ public class Main {
         Imgproc.cvtColor(frameDiff, frameDiff, Imgproc.COLOR_BGR2GRAY);
     	Imgproc.threshold(frameDiff, frameDiff, 35, 255, Imgproc.THRESH_BINARY);
     	
-		Highgui.imwrite("testing/movement/"+frame_count+"output.jpg",frameDiff);
-    	
     	//now that be have the mat of movement, get each unique blob of movement in it.
-    	return ImagePartitioning.OutlineBlobDetection(frameDiff,ImagePartitioning.PERSON_IDENTIFICATION);
+    	ArrayList<Pair<int[], Integer>> store = ImagePartitioning.OutlineBlobDetection(frameDiff,ImagePartitioning.PERSON_IDENTIFICATION);
+    	
+        Highgui.imwrite("testing/movement/"+frame_count+"output.jpg",frameDiff);
+        
+        return store;
     }
     
     /** find green dot in image */
