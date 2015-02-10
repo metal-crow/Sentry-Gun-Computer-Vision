@@ -27,6 +27,7 @@ The interaction between the main program and external objects. Hardware for exam
   
 ToDo
 ==========================
+* Calibrate the hardware. Ensure fov is correct and that it actually points at the correct location.  
 * Rewrite docs for new algoritms and methods.  
 * MOVEMENT SMOOTHING. Use memory to smoothly transiton between target points, no jittering.  
 * Improve outline generation.  

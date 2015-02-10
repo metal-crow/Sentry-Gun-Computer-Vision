@@ -45,7 +45,7 @@ public class MassDetectionandObjectPriority implements Callable<Pair<int[],Integ
 		//is findCountours really the fastest and best method for this?
 		List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
 		Imgproc.findContours(blobimg.clone(), contours, new Mat(), Imgproc.RETR_EXTERNAL , Imgproc.CHAIN_APPROX_NONE);
-		Rect boundingbox=Imgproc.boundingRect(contours.get(0));//there should always be only one (flood fill from BlobDetection) FIXME there sometimes isnt
+		Rect boundingbox=Imgproc.boundingRect(contours.get(0));//there should always be only one (flood fill from GetDiscreteBlobsFromFragments) FIXME there sometimes isnt
 		
 		//find the center of mass in this area
 		int[] rect=findCenterOfMass(boundingbox, blobimg);

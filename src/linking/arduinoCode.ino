@@ -11,8 +11,8 @@ void setup() {
  servoY.attach(8);
  servoT.attach(7);
  pinMode(13, OUTPUT);//for the laser marker
- servoX.write(60);//write the starting point as maxangle/2 so that 0 will go left and maxangle will go right
- servoY.write(30);
+ servoX.write(45);//write the starting point as maxangle/2 so that 0 will go left and maxangle will go right
+ servoY.write(23);
  
  delay(1000);//wait for a second
 }
