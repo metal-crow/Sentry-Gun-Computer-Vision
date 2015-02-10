@@ -90,7 +90,7 @@ public class ImagePartitioning {
                 }
     	    }
     	    
-    	    //need this catch in case we couldn't get an outline b/c there were not enough blobs or FIXME the point we returned wasn't in the blobs whitespace
+    	    //need this catch in case we couldn't get an outline b/c there were not enough blobs
     	    if(blobsFromOutlines.isEmpty()){
                 return new ArrayList<Pair<int[], Integer>>();
             }
