@@ -85,7 +85,7 @@ public class GenerateBlobFromOutline implements Callable<int[]>{
         }
         
         //if we find an outline or a big enough blob
-        return new int[]{startingBlob.x,startingBlob.y};
+        return new int[]{(int) outline.get(0).x,(int) outline.get(0).y};
     }
     
     /**
