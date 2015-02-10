@@ -16,6 +16,7 @@ public class GenerateBlobFromOutline implements Callable<int[]>{
     private ArrayList<Rect> blobs;
     private Mat img;
     ArrayList<Point> outline=new ArrayList<Point>();
+    private static final int minSize=300;
 
     /**
      * Pick one blob, choose closest blob to it. Connect them. Remove from list of available blobs.
@@ -30,14 +31,27 @@ public class GenerateBlobFromOutline implements Callable<int[]>{
         this.startingBlob = blobs.get(i);
         //remove starting blob from list
         blobs.remove(i);
-        //store this starting point
-        outline.add(new Point(startingBlob.x+(startingBlob.width/2),startingBlob.y+(startingBlob.height/2)));
         this.blobs = blobs;
         this.img = img;
     }
     
     @Override
     public int[] call(){
+        //store this starting point. MUST ensure that is is actually in the blobs whitespace else the method it returns to will find this thread failed.
+        boolean exit=false;
+        int y=startingBlob.y;
+        while(y<startingBlob.y+startingBlob.height && !exit){
+            int x=startingBlob.x;
+            while(x<startingBlob.x+startingBlob.width && !exit){
+                if(img.get(y, x)[0]==255){
+                    outline.add(new Point(x,y));
+                    exit=true;
+                }
+                x++;
+            }
+            y++;
+        }
+        
         Rect currentBlob=startingBlob;
         Boolean endblob1=false;
         Rect nextblob=getBlobClose(currentBlob);
@@ -62,8 +76,15 @@ public class GenerateBlobFromOutline implements Callable<int[]>{
         }
         
         //fill the area we just outlined
-        fillOutlineOfPoints(outline);
+        if(outline.size()>2){
+            fillOutlineOfPoints(outline);
+        }
+        //if we didnt find an outline and a single blob ISNT big enough, return null
+        else if((startingBlob.width*startingBlob.height)<minSize){
+            return null;
+        }
         
+        //if we find an outline or a big enough blob
         return new int[]{startingBlob.x,startingBlob.y};
     }
     
@@ -116,7 +137,7 @@ public class GenerateBlobFromOutline implements Callable<int[]>{
         int index=-1;
         for(int i=0;i<blobs.size();i++){
             if(!blobs.get(i).equals(currentBlob)){
-                //FIXME simplified distance finder
+                //FIXME simplified distance finder.
                 int xdistance=Math.abs( (currentBlob.x+(currentBlob.width/2) ) - (blobs.get(i).x+(blobs.get(i).width/2) ));
                 int ydistance=Math.abs( (currentBlob.y+(currentBlob.height/2) ) - (blobs.get(i).y+(blobs.get(i).height/2) ));
                 int tempdist=(int) Math.hypot(xdistance, ydistance);

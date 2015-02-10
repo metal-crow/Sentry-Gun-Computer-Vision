@@ -59,9 +59,9 @@ public class Main {
     	curFrame=new Mat();
     	nextFrame=new Mat();
     	
-        String filename="testing/movement test.avi";
-        VideoCapture video = new VideoCapture(filename);
-    	//VideoCapture video = new VideoCapture(0);
+        //String filename="testing/movement test.avi";
+        //VideoCapture video = new VideoCapture(filename);
+    	VideoCapture video = new VideoCapture(0);
     	
         video.read(curFrame);
     	video.read(nextFrame);
@@ -238,7 +238,7 @@ public class Main {
         ArrayList<Mat> laser_binary_channels = new ArrayList<Mat>(3);
         Core.split(hsv_channel, laser_binary_channels);
         
-        //Highgui.imwrite("testing/laser/"+frame_count+"output LZ.jpg",hsv_channel);
+        Highgui.imwrite("testing/laser/"+frame_count+"output LZ.jpg",hsv_channel);
         
         return ImagePartitioning.BasicBlobDetection(laser_binary_channels.get(laser_binary_channels.size()-1),4,ImagePartitioning.LASER_IDENTIFICATION);
     }

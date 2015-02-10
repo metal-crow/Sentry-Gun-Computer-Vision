@@ -67,7 +67,11 @@ public class ImagePartitioning {
     	    executor.shutdown();
     	    for(Future<int[]> t:tasks){
     	        try {
-    	            blobsFromOutlinespreDup.add(t.get());
+    	            int[] store=t.get();
+    	            //check to make sure the thread didn't return that it couldn't use the blobs
+    	            if(store!=null){
+    	                blobsFromOutlinespreDup.add(store);
+    	            }
                 } catch (InterruptedException | ExecutionException e) {
                     e.printStackTrace();
                 }
@@ -86,7 +90,7 @@ public class ImagePartitioning {
                 }
     	    }
     	    
-    	    //need this catch in case ... something happens and the blobs we put into outline generation dont return an outline
+    	    //need this catch in case we couldn't get an outline b/c there were not enough blobs or FIXME the point we returned wasn't in the blobs whitespace
     	    if(blobsFromOutlines.isEmpty()){
                 return new ArrayList<Pair<int[], Integer>>();
             }

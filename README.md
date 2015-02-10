@@ -25,8 +25,9 @@ Anything after the image is analyzed that uses the results from image analysis
 Linking  
 The interaction between the main program and external objects. Hardware for example.  
   
-ToDo (in order)
+ToDo
 ==========================
+* Rewrite docs for new algoritms and methods.  
 * MOVEMENT SMOOTHING. Use memory to smoothly transiton between target points, no jittering.  
 * Improve outline generation.  
 * Add object permanence, memory for objects   
@@ -34,6 +35,8 @@ ToDo (in order)
 * Work on improving person detection algorithms  
 * Hardware General  
 	a) Shoddy connection between x servo and base, entire platform is tilting.  
+	b) Camera is really low res and low fov, get better one  
+	c) Get a gun i can actually fire with a single servo trigger. Airsoft?  
 * Add controls and gui for the user  
 
 Design
