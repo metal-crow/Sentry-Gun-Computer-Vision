@@ -86,8 +86,8 @@ public class MassDetectionandObjectPriority implements Callable<Pair<int[],Integ
 		    
 		    //FIXME this public method referral is stupid and should be fixed here and in DetectPerson.isBlobHuman.
 		    //makes debugging hard, but less stuff to pass
-		    Mat test=Main.curFrame.clone();
-		    Core.rectangle(test, new Point(boundingbox.x,boundingbox.y), new Point(boundingbox.x+boundingbox.width,boundingbox.y+boundingbox.height), new Scalar(0,255,0));
+		    //Mat test=Main.curFrame.clone();
+		    //Core.rectangle(test, new Point(boundingbox.x,boundingbox.y), new Point(boundingbox.x+boundingbox.width,boundingbox.y+boundingbox.height), new Scalar(0,255,0));
 	        //Highgui.imwrite("testing/person/"+Main.frame_count+" "+boundingbox.x+"output.jpg",test);
 	        
 		    //find likelihood this is a person

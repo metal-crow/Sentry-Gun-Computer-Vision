@@ -27,17 +27,17 @@ The interaction between the main program and external objects. Hardware for exam
   
 ToDo
 ==========================
-* Calibrate the hardware. Ensure fov is correct and that it actually points at the correct location.  
-* Rewrite docs for new algoritms and methods.  
-* MOVEMENT SMOOTHING. Use memory to smoothly transiton between target points, no jittering.  
+* Reuse threads instead of remaking them for each new frame. Thread creation has large overhead.  
+* Rewrite docs for new algorithms and methods.  
+* MOVEMENT SMOOTHING. Use memory to smoothly transition between target points, no jittering.  
 * Improve outline generation.  
 * Add object permanence, memory for objects   
-* Handle turret not shooting at its own bullet  
 * Work on improving person detection algorithms  
 * Hardware General  
-	a) Shoddy connection between x servo and base, entire platform is tilting.  
-	b) Camera is really low res and low fov, get better one  
-	c) Get a gun i can actually fire with a single servo trigger. Airsoft?  
+	a) Camera is really low res and low fov, get better one  
+	b) Get a gun i can actually fire with a single servo trigger. Airsoft?  
+	c) Remake entire hardware in solid structure.  
+* Handle turret not shooting at its own bullet  
 * Add controls and gui for the user  
 
 Design

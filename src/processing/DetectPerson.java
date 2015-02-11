@@ -7,6 +7,7 @@ import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;
 import org.opencv.core.Scalar;
+import org.opencv.highgui.Highgui;
 import org.opencv.objdetect.CascadeClassifier;
 
 public class DetectPerson {
@@ -38,16 +39,17 @@ public class DetectPerson {
         MatOfRect faceDetections = new MatOfRect();
         //check for a frontally facing face
         CascadeClassifier frontalFaceDetector = new CascadeClassifier(FrontalCascadeClassifierFile);
-        frontalFaceDetector.detectMultiScale(img, faceDetections);
+        //frontalFaceDetector.detectMultiScale(img, faceDetections);XXX TEMPORARY ONLY
         if(faceDetections.toArray().length>0){
-            System.out.println("Detected face");//DEBUGGING
+            //Highgui.imwrite("testing/person/"+Main.frame_count+".jpg", img);
+            System.out.println("Detected face Frontal");//DEBUGGING
             return blobArea+(frameArea*2);
         }
         //check for a face in profile
         CascadeClassifier profileFaceDetector = new CascadeClassifier(ProfileCascadeClassifierFile);
         profileFaceDetector.detectMultiScale(img, faceDetections);
         if(faceDetections.toArray().length>0){
-            System.out.println("Detected face");//DEBUGGING
+            System.out.println("Detected face Profile");//DEBUGGING
             return blobArea+(frameArea*2);
         }
         

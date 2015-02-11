@@ -145,7 +145,7 @@ public class Main {
         		//exclude any results with a priority < frameArea (see detectperson for how priority generation works and why this works)
         		target=null;
     	        for(Pair<int[], Integer> t:targets){
-    	            if((target!=null && t.getValue1()>(curFrame.width()*curFrame.height())) || (target!=null && t.getValue1()>target.getValue1())){
+    	            if(t.getValue1()>(curFrame.width()*curFrame.height()) || (target!=null && t.getValue1()>target.getValue1())){
     	                target=t;
     	                foundTarget=true;
     	            }
@@ -154,11 +154,11 @@ public class Main {
     		
 
             //remember what just happened.
-    		if(target==null){
+    		/*if(target==null){
     		    Memory.commitObjectToMemory(new int[]{-1,-1}, objectPermanence);
     		}else{
     		    Memory.commitObjectToMemory(target.getValue0(), objectPermanence);
-    		}
+    		}*/
     		
     		//if we have found a target, send its coordinates to the arduino and shoot
     		if(foundTarget){
@@ -179,7 +179,7 @@ public class Main {
 	        //DEBUG WRITING FOR TESTING
 			try {
 				panel.setImage(drawImg);
-		        Highgui.imwrite("testing/test/"+frame_count+"output.jpg",drawImg);
+		        //Highgui.imwrite("testing/test/"+frame_count+"output.jpg",drawImg);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -223,7 +223,7 @@ public class Main {
     	//now that be have the mat of movement, get each unique blob of movement in it.
     	ArrayList<Pair<int[], Integer>> store = ImagePartitioning.OutlineBlobDetection(frameDiff,ImagePartitioning.PERSON_IDENTIFICATION);
     	
-        Highgui.imwrite("testing/movement/"+frame_count+"output.jpg",frameDiff);
+        //Highgui.imwrite("testing/movement/"+frame_count+"output.jpg",frameDiff);
         
         return store;
     }
@@ -238,7 +238,7 @@ public class Main {
         ArrayList<Mat> laser_binary_channels = new ArrayList<Mat>(3);
         Core.split(hsv_channel, laser_binary_channels);
         
-        Highgui.imwrite("testing/laser/"+frame_count+"output LZ.jpg",hsv_channel);
+        //Highgui.imwrite("testing/laser/"+frame_count+"output LZ.jpg",hsv_channel);
         
         return ImagePartitioning.BasicBlobDetection(laser_binary_channels.get(laser_binary_channels.size()-1),4,ImagePartitioning.LASER_IDENTIFICATION);
     }
