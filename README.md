@@ -29,10 +29,9 @@ ToDo
 ==========================
 * Reuse threads instead of remaking them for each new frame. Thread creation has large overhead.  
 * Rewrite docs for new algorithms and methods.  
-* Initalize background image from 1st couple of frames on startup. This allows massive improvement in accuracy of any object.
-* MOVEMENT SMOOTHING. Use memory to smoothly transition between target points, no jittering.  
+* I could initalize background image from 1st couple of frames on startup. This allows massive improvement in accuracy of any object. However, what if this turret is used in a situation where it doesnt have times to build a base? Like on a car that suddenly stops and the turret needs to detect motion immediatly and fire (military use)? I should implement both.  
 * Improve outline generation.  
-* Add object permanence, memory for objects   
+* Use memory to smoothly transition between target points, no jittering.  
 * Work on improving person detection algorithms  
 * Hardware General  
 	a) Camera is really low res and low fov, get better one  
