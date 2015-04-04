@@ -3,12 +3,15 @@ package preprocessing;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
 
+import main.Main;
+
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
+import org.opencv.highgui.Highgui;
 
 public class GenerateBlobFromOutline implements Callable<int[]>{
 
@@ -83,6 +86,8 @@ public class GenerateBlobFromOutline implements Callable<int[]>{
         else if((startingBlob.width*startingBlob.height)<minSize){
             return null;
         }
+        
+        //Highgui.imwrite("testing/blob/blob"+Main.frame_count+" "+outline.get(0)+".png", img);//debugging
         
         //if we find an outline or a big enough blob
         return new int[]{(int) outline.get(0).x,(int) outline.get(0).y};
