@@ -26,7 +26,7 @@ public class ImagePartitioning {
         LASER_IDENTIFICATION=1,
         PERSON_IDENTIFICATION=2;
     
-    private static final int minBlobArea=35;
+    private static final int minBlobArea=20;
     
     /**
      * Get array of all blobs in image. Blob will be represented by bounding box.
@@ -41,6 +41,7 @@ public class ImagePartitioning {
 	    Imgproc.findContours(img.clone(), contours, new Mat(), Imgproc.RETR_EXTERNAL , Imgproc.CHAIN_APPROX_NONE);
 	    for(MatOfPoint points:contours){
 	        Rect blobbound=Imgproc.boundingRect(points);
+	        //a min size here is a balance between speed and outline accuracy
 	        if(blobbound.width*blobbound.height>minBlobArea){
 	            blobs.add(blobbound);
 	        }
