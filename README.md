@@ -27,6 +27,7 @@ The interaction between the main program and external objects. Hardware for exam
   
 ToDo
 ==========================
+* Java keeps crashing after extended period
 * NEED MOTION SMOOTHING
 * Reuse threads instead of remaking them for each new frame. Thread creation has large overhead.  
 * Rewrite docs for new algorithms and methods.  
