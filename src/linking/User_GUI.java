@@ -1,6 +1,8 @@
 package linking;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -9,22 +11,26 @@ import java.io.InputStream;
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 
+import main.Main;
+
+import org.javatuples.Pair;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
 import org.opencv.highgui.Highgui;
 
 
 @SuppressWarnings("serial")
-public class RealTime_Video_Showing extends JPanel{
+public class User_GUI extends JPanel implements MouseListener{
 	
 	private BufferedImage BMimg;
 	private int width;
 	private int height;
 	
-	public RealTime_Video_Showing(int width, int height){
+	public User_GUI(int width, int height){
 		this.width=width;
 		this.height=height;
 		BMimg=new BufferedImage(width, height, 1);
+        addMouseListener(this);
 	}
 	
 	public Dimension getPreferredSize() {
@@ -50,5 +56,27 @@ public class RealTime_Video_Showing extends JPanel{
 		}catch(Exception e){
 			System.err.println("Could not draw");
 		}
-	} 
+	}
+
+    @Override
+    public void mouseClicked(MouseEvent m) {
+        Main.foundTarget=true;
+        Main.target=Pair.with(new int[]{m.getX(),m.getY()},7);
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent arg0) {
+    }
+
+    @Override
+    public void mouseExited(MouseEvent arg0) {
+    }
+
+    @Override
+    public void mousePressed(MouseEvent arg0) {
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent arg0) {
+    } 
 }

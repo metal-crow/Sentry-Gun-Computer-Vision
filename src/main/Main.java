@@ -11,7 +11,7 @@ import java.util.Arrays;
 import javax.swing.JFrame;
 
 import linking.ArduinoInteraction;
-import linking.RealTime_Video_Showing;
+import linking.User_GUI;
 
 import org.javatuples.Pair;
 import org.opencv.core.Core;
@@ -43,7 +43,8 @@ public class Main {
 		
 	//sending information to hardware and arduino
 	private static ArduinoInteraction arduinoOut;
-	public static boolean foundTarget=false;
+	public static volatile boolean foundTarget=false;
+	public static volatile Pair<int[], Integer> target;
 	
 	//Safely exit loop to close program
     private static boolean exit=false;
@@ -66,10 +67,10 @@ public class Main {
         video.read(curFrame);
     	video.read(nextFrame);
     	
-		//frame to view the video in real time
+		//frame for gui
 		JFrame f = new JFrame();
         f.setSize(nextFrame.cols(),nextFrame.rows());
-        RealTime_Video_Showing panel = new RealTime_Video_Showing(nextFrame.cols(),nextFrame.rows());
+        User_GUI panel = new User_GUI(nextFrame.cols(),nextFrame.rows());
 		f.add(panel);
         f.pack();
         f.setVisible(true);
@@ -90,11 +91,10 @@ public class Main {
         	//DEBUGGING: frame copy to draw on
     		Mat drawImg=nextFrame.clone();
 	        long time=System.currentTimeMillis();//DEBUGGING TIME
-	        
-	        //the target
-            Pair<int[], Integer> target=Pair.with(new int[]{-1,-1}, 7);//the min priority for the laser
-	        
             
+	        //the target
+	        target=Pair.with(new int[]{-1,-1}, 7);//the min priority for the laser
+	        
 	        //Green dot detection
 	        ArrayList<Pair<int[], Integer>> laser_points = null;
 			try {
@@ -161,7 +161,7 @@ public class Main {
     		}*/
     		
     		//if we have found a target, send its coordinates to the arduino and shoot
-    		if(foundTarget){
+    		if(foundTarget && target!=null){
     		    //MovementSmoothing.smoothTarget(objectPermanence,target.getValue0());
     		    try{
                     System.out.println("Target coord: "+Arrays.toString(target.getValue0()));//DEBUGGING
