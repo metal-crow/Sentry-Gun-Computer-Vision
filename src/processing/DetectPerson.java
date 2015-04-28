@@ -7,7 +7,6 @@ import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;
 import org.opencv.core.Scalar;
-import org.opencv.highgui.Highgui;
 import org.opencv.objdetect.CascadeClassifier;
 
 public class DetectPerson {
@@ -39,34 +38,34 @@ public class DetectPerson {
         MatOfRect faceDetections = new MatOfRect();
         
         //check for a frontally facing face
-        //TODO this is generating mulitple false positives, currently disabled
+        //TODO this is generating false positives
         CascadeClassifier frontalFaceDetector = new CascadeClassifier(FrontalCascadeClassifierFile);
-        //frontalFaceDetector.detectMultiScale(img, faceDetections);XXX TEMPORARY ONLY
+        frontalFaceDetector.detectMultiScale(img, faceDetections);
         if(faceDetections.toArray().length>0){
             //Highgui.imwrite("testing/person/"+Main.frame_count+".jpg", img);
-            System.out.println("Detected face Frontal");//DEBUGGING
             return blobArea+(frameArea*2);
         }
+        
         //check for a face in profile
         CascadeClassifier profileFaceDetector = new CascadeClassifier(ProfileCascadeClassifierFile);
         profileFaceDetector.detectMultiScale(img, faceDetections);
         if(faceDetections.toArray().length>0){
-            System.out.println("Detected face Profile");//DEBUGGING
+            //Highgui.imwrite("testing/person/"+Main.frame_count+".jpg", img);
             return blobArea+(frameArea*2);
         }
         
         //next check for skin, see if the blob contains skin color
         //this can be falsely positive (peach walls) or falsely negative (weird lighting)
-        //TODO temp disabled b/c false positives, need to alter skin hsv range
-        /*Mat skin=new Mat();
+        //TODO false positives, need to alter skin hsv range
+        Mat skin=new Mat();
         Core.inRange(img, skinColors.getValue0(), skinColors.getValue1(), skin);
         //if there is a non-insignificant amount of skin
         int amountOfSkin=Core.countNonZero(skin);
+        skin.release();
         if(amountOfSkin>img.cols()*3){
-            System.out.println("Detected skin");//DEBUGGING
             //the priority must be > than 1 thing, so add the maximum 1 time
             return amountOfSkin+frameArea;
-        }*/
+        }
         
         //if we find neither, the size of the blob is the priority
         return blobArea;

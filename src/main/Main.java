@@ -19,12 +19,9 @@ import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
-import org.opencv.highgui.Highgui;
 import org.opencv.highgui.VideoCapture;
 import org.opencv.imgproc.Imgproc;
 
-import postprocessing.Memory;
-import postprocessing.MovementSmoothing;
 import preprocessing.ImagePartitioning;
  
 /**
@@ -54,7 +51,11 @@ public class Main {
     
     public static void main(String[] args) throws UnsupportedCommOperationException, PortInUseException, NoSuchPortException, InterruptedException, IOException {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-        arduinoOut=new ArduinoInteraction();
+        try{
+            arduinoOut=new ArduinoInteraction();
+        }catch(Exception e){
+            System.err.println("Arduino Disabled");
+        }
     	
         prevFrame=new Mat();
     	curFrame=new Mat();
@@ -83,6 +84,9 @@ public class Main {
         });
         
         while(video.isOpened() && video.grab() && !exit){
+            //release the last frame
+            prevFrame.release();
+            
         	//move the frame buffer of 3 frames forward one
         	prevFrame=curFrame.clone();
         	curFrame=nextFrame.clone();
@@ -96,31 +100,19 @@ public class Main {
 	        target=Pair.with(new int[]{-1,-1}, 7);//the min priority for the laser
 	        
 	        //Green dot detection
-	        ArrayList<Pair<int[], Integer>> laser_points = null;
-			try {
-				laser_points = greenDotDetection(drawImg);
-			} catch (Exception e1) {
-				System.err.println("Laser pointer error");
-				e1.printStackTrace();
-			}
+	        ArrayList<Pair<int[], Integer>> laser_points = greenDotDetection(drawImg);
 	        //pick the point with the priority greater than the given min (most likely to be laser point)
     		for(Pair<int[], Integer> t:laser_points){
     			if(t.getValue1()>target.getValue1()){
     			    target=t;
     				foundTarget=true;
     			}
-    			if(foundTarget){System.out.println("Laser detected");}//DEBUGGING
+    			if(foundTarget){System.out.println("Laser detected");}
     		}
             
     		
         	//movement detection
-    		ArrayList<Pair<int[], Integer>> targets = null;
-			try {
-			    targets = movementDetection();
-			} catch (Exception e1) {
-				System.err.println("Movement error");
-				e1.printStackTrace();
-			}
+    		ArrayList<Pair<int[], Integer>> targets = movementDetection();
     		//make sure we haven't already set the target as laser has priority over movement
     		//if we have any movement
     		if(!foundTarget && targets.size()>0){
@@ -132,14 +124,14 @@ public class Main {
 	                    target=t;
 	                }
 	            }
-	            System.out.println("Movement detected");//DEBUGGING
+	            System.out.println("Movement detected");
     		}
 	        
     		
     		//if we have not found any movement or laser pointer, perform at rest person identification
     		//edge case where the first couple of frames are empty
     		if(!foundTarget && Main.curFrame.width()!=0){
-    		    System.out.println("At rest");//DEBUGGING
+    		    System.out.println("At rest");
         		targets = ImagePartitioning.FragmentationSplitting(curFrame,4);
         		//if none of these results have detected a face or skin, they will return the size of their fragment as priority
         		//exclude any results with a priority < frameArea (see detectperson for how priority generation works and why this works)
@@ -152,47 +144,44 @@ public class Main {
     	        }
     		}
     		
-
-            //remember what just happened.
-    		/*if(target==null){
-    		    Memory.commitObjectToMemory(new int[]{-1,-1}, objectPermanence);
-    		}else{
-    		    Memory.commitObjectToMemory(target.getValue0(), objectPermanence);
-    		}*/
     		
     		//if we have found a target, send its coordinates to the arduino and shoot
     		if(foundTarget && target!=null){
-    		    //MovementSmoothing.smoothTarget(objectPermanence,target.getValue0());
     		    try{
                     System.out.println("Target coord: "+Arrays.toString(target.getValue0()));//DEBUGGING
-                    arduinoOut.arduinoScreenPositiontoAngle(target.getValue0(),curFrame.width(),curFrame.height());
+                    if(arduinoOut!=null){
+                        arduinoOut.arduinoScreenPositiontoAngle(target.getValue0(),curFrame.width(),curFrame.height());
+                        arduinoOut.fire();
+                    }
                     Core.circle(drawImg, new Point(target.getValue0()[0],target.getValue0()[1]), 4, new Scalar(0,0,255),-1);//DEBUGGING
-    		        arduinoOut.fire();
     		    }catch(IOException e){
-    		        System.err.println("error firing");
-    		        e.printStackTrace();
+    		        System.err.println("Error firing");
     		    }
     		}
     		
 	        System.out.println("Time for frame "+frame_count+" (millisec) : "+(System.currentTimeMillis()-time)+"-------------------------------");
 	        
-	        //DEBUG WRITING FOR TESTING
 			try {
 				panel.setImage(drawImg);
 		        //Highgui.imwrite("testing/test/"+frame_count+"output.jpg",drawImg);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+			//free gui frame copy
+			drawImg.release();
 			
     		//reset shooting info
 			foundTarget=false;
-    		arduinoOut.flush();
-    		
+			if(arduinoOut!=null){
+			    arduinoOut.flush();
+			}
     		frame_count++;
         }
         
         System.out.println("Exit");
-        arduinoOut.close();
+        if(arduinoOut!=null){
+            arduinoOut.close();
+        }
         video.release();
         f.setVisible(false);
         f.dispose();
@@ -203,7 +192,7 @@ public class Main {
     /**
      * Get a area in the video that is movement
      */
-    private static ArrayList<Pair<int[], Integer>> movementDetection() throws Exception{
+    private static ArrayList<Pair<int[], Integer>> movementDetection(){
     	//get the difference between the frames
     	//this is done based on http://blog.cedric.ws/opencv-simple-motion-detection
     	Mat absDiff1=new Mat();
@@ -217,6 +206,8 @@ public class Main {
 
         Mat frameDiff=new Mat();
     	Core.bitwise_and(absDiff1, absDiff2, frameDiff);
+    	absDiff1.release();
+    	absDiff2.release();
         Imgproc.cvtColor(frameDiff, frameDiff, Imgproc.COLOR_BGR2GRAY);
     	Imgproc.threshold(frameDiff, frameDiff, 35, 255, Imgproc.THRESH_BINARY);
     	
@@ -224,12 +215,13 @@ public class Main {
     	ArrayList<Pair<int[], Integer>> store = ImagePartitioning.OutlineBlobDetection(frameDiff,ImagePartitioning.PERSON_IDENTIFICATION);
     	
         //Highgui.imwrite("testing/movement/"+frame_count+"output.jpg",frameDiff);
-        
+        frameDiff.release();
+
         return store;
     }
     
     /** find green dot in image */
-    private static ArrayList<Pair<int[], Integer>> greenDotDetection(Mat drawImg) throws Exception{
+    private static ArrayList<Pair<int[], Integer>> greenDotDetection(Mat drawImg){
     	//Green dot detection
     	Mat hsv_channel = new Mat();
         Imgproc.cvtColor(nextFrame,hsv_channel, Imgproc.COLOR_BGR2HSV);
@@ -239,7 +231,12 @@ public class Main {
         Core.split(hsv_channel, laser_binary_channels);
         
         //Highgui.imwrite("testing/laser/"+frame_count+"output LZ.jpg",hsv_channel);
-        
-        return ImagePartitioning.BasicBlobDetection(laser_binary_channels.get(laser_binary_channels.size()-1),4,ImagePartitioning.LASER_IDENTIFICATION);
+        ArrayList<Pair<int[], Integer>> result = ImagePartitioning.BasicBlobDetection(laser_binary_channels.get(laser_binary_channels.size()-1),4,ImagePartitioning.LASER_IDENTIFICATION);
+        //frees
+        hsv_channel.release();
+        for(Mat m:laser_binary_channels){
+            m.release();
+        }
+        return result;
     }
 }

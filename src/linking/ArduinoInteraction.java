@@ -18,7 +18,7 @@ public class ArduinoInteraction {
 	private OutputStream arduinoOut;
 
     //I get distortion at screen edges. This is dependent on fov of camera. Need this to recalculate.
-	private static final int xFOV=50;
+	private static final int xFOV=60;
 	private static final int yFOV=34;
 	
     private static final int TIME_OUT = 1000; // Port open timeout

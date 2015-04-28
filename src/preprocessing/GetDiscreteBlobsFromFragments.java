@@ -51,6 +51,7 @@ public class GetDiscreteBlobsFromFragments implements Callable<ArrayList<Pair<in
 					synchronized (fullImg) {
 						size=Imgproc.floodFill(fragment, new Mat(), new Point(x,y), new Scalar(startingcolor));
 					}
+					//check if blob size if > error params
 					if(size>=minSize){
 					    Callable<Pair<int[],Integer>> thread =new MassDetectionandObjectPriority(fragment,startingcolor,identification);
 					    tasks.add(executor.submit(thread));

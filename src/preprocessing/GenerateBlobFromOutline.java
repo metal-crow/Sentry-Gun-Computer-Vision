@@ -3,15 +3,12 @@ package preprocessing;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
 
-import main.Main;
-
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
-import org.opencv.highgui.Highgui;
 
 public class GenerateBlobFromOutline implements Callable<int[]>{
 
@@ -101,33 +98,35 @@ public class GenerateBlobFromOutline implements Callable<int[]>{
      */
     private void fillOutlineOfPoints(ArrayList<Point> outline){
         while(outline.size()>2){
-            //find current highest point at this time
+            //find highest point
             Point topPoint = outline.get(0);
             for(Point p:outline){
+                //if point is above current top point
                 if(topPoint.y>p.y){
                     topPoint=p;
                 }
             }
             outline.remove(topPoint);
             
-            //get the two points below it
-            Point[] twoLowerPoints=new Point[]{outline.get(0), outline.get(1)};
-            //go through the outline list of points
+            //find second highest point
+            Point secondpoint=outline.get(0);
             for(Point p:outline){
-                //when we find a point lower than the top point and we haven't saved it
-                if(p.y>topPoint.y && !twoLowerPoints[0].equals(p) && !twoLowerPoints[1].equals(p)){
-                    //if its higher than either of our two stored lower points, save it
-                    if(twoLowerPoints[0].y>p.y){
-                        twoLowerPoints[0]=p;
-                    }else if(twoLowerPoints[1].y>p.y){
-                        twoLowerPoints[1]=p;
-                    }
+                if(secondpoint.y>p.y){
+                    secondpoint=p;
+                }
+            }
+            
+            //find third highest point
+            Point thirdpoint=outline.get(1);
+            for(Point p:outline){
+                if(thirdpoint.y>p.y && !p.equals(secondpoint)){
+                    thirdpoint=p;
                 }
             }
             
             //fill in the triangle made by these points 
             synchronized (img) {
-                Core.fillConvexPoly(img, new MatOfPoint(topPoint,twoLowerPoints[0],twoLowerPoints[1]), new Scalar(255));
+                Core.fillConvexPoly(img, new MatOfPoint(topPoint,secondpoint,thirdpoint), new Scalar(255));
             }
         }
     }

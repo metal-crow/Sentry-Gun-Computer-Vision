@@ -3,11 +3,6 @@ Sentry-Gun-Computer-Vision
 
 Major project for CSH. Detects people for use in a sentry gun.
 
-I have a partial C++ port written, but i am unsure if i will finish porting this.
-
-NOTES:
-grid based detection? Inaccuate, fast, scalable. Split image into grid, thread each, find grid with most movement. Target.
-
 Package Info
 ------------
 main  
