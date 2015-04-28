@@ -131,7 +131,6 @@ public class Main {
     		//if we have not found any movement or laser pointer, perform at rest person identification
     		//edge case where the first couple of frames are empty
     		if(!foundTarget && Main.curFrame.width()!=0){
-    		    System.out.println("At rest");
         		targets = ImagePartitioning.FragmentationSplitting(curFrame,4);
         		//if none of these results have detected a face or skin, they will return the size of their fragment as priority
         		//exclude any results with a priority < frameArea (see detectperson for how priority generation works and why this works)
@@ -142,6 +141,7 @@ public class Main {
     	                foundTarget=true;
     	            }
     	        }
+    	        if(foundTarget){System.out.println("Rest detection found "+(target.getValue1()>(2*(Main.curFrame.width()*Main.curFrame.height()))?"a face":"skin"));}
     		}
     		
     		

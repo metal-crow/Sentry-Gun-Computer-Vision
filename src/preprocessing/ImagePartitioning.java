@@ -198,7 +198,7 @@ public class ImagePartitioning {
         for(Future<Pair<int[],Integer>> task:tasks){
             try {
                     targets.add(task.get());
-            } catch (InterruptedException | ExecutionException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
