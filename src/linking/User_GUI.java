@@ -60,8 +60,7 @@ public class User_GUI extends JPanel implements MouseListener{
 
     @Override
     public void mouseClicked(MouseEvent m) {
-        Main.foundTarget=true;
-        Main.target=Pair.with(new int[]{m.getX(),m.getY()},7);
+        Main.target.GUIsetTarget(true, Pair.with(new int[]{m.getX(),m.getY()},7));
     }
 
     @Override
