@@ -22,7 +22,6 @@ The interaction between the main program and external objects. Hardware for exam
   
 ToDo
 ==========================
-* Add software manual targeting
 * REALLY need to rewrite in C
 	* Java keeps crashing after extended period
 * NEED MOTION SMOOTHING. Use memory to smoothly transition between target points, no jittering.  
