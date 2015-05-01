@@ -40,7 +40,7 @@ public class DetectPerson {
         //check for a frontally facing face
         //TODO this is generating false positives
         CascadeClassifier frontalFaceDetector = new CascadeClassifier(FrontalCascadeClassifierFile);
-        frontalFaceDetector.detectMultiScale(img, faceDetections);
+        //frontalFaceDetector.detectMultiScale(img, faceDetections);XXX
         if(faceDetections.toArray().length>0){
             //Highgui.imwrite("testing/person/"+Main.frame_count+".jpg", img);
             return blobArea+(frameArea*2);
@@ -48,7 +48,7 @@ public class DetectPerson {
         
         //check for a face in profile
         CascadeClassifier profileFaceDetector = new CascadeClassifier(ProfileCascadeClassifierFile);
-        profileFaceDetector.detectMultiScale(img, faceDetections);
+        //profileFaceDetector.detectMultiScale(img, faceDetections);XXX
         if(faceDetections.toArray().length>0){
             //Highgui.imwrite("testing/person/"+Main.frame_count+".jpg", img);
             return blobArea+(frameArea*2);
@@ -60,7 +60,7 @@ public class DetectPerson {
         Mat skin=new Mat();
         Core.inRange(img, skinColors.getValue0(), skinColors.getValue1(), skin);
         //if there is a non-insignificant amount of skin
-        int amountOfSkin=Core.countNonZero(skin);
+        int amountOfSkin=0;//Core.countNonZero(skin);XXX
         skin.release();
         if(amountOfSkin>img.cols()*3){
             //the priority must be > than 1 thing, so add the maximum 1 time
