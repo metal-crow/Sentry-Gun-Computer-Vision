@@ -100,7 +100,7 @@ public class Main {
 	        //pick the point with the priority greater than the given min (most likely to be laser point)
     		for(Pair<int[], Integer> t:laser_points){
     			if(t.getValue1()>target.priority()){
-    			    target.setTarget(true, t);
+    			    target.setTarget(t);
     			}
     			if(target.foundTarget()){System.out.println("Laser detected");}
     		}
@@ -113,10 +113,10 @@ public class Main {
     		if(!target.foundTarget() && targets.size()>0){
 	    	    //get the highest priority target (most likely to be a person)
 	    		//get any movement to compare other movements with.
-	    		target.setTarget(true, targets.get(0));
+	    		target.setTarget(targets.get(0));
 	            for(Pair<int[], Integer> t:targets){
 	                if(t.getValue1()>target.priority()){
-	                    target.setTarget(true, t);
+	                    target.setTarget(t);
 	                }
 	            }
 	            System.out.println("Movement detected");
@@ -135,7 +135,7 @@ public class Main {
 	                    t.getValue1()>(curFrame.width()*curFrame.height()) && t.getValue1()>target.priority()
     	              )
     	            {
-                        target.setTarget(true, t);
+                        target.setTarget(t);
     	            }
     	        }
     	        if(target.foundTarget()){System.out.println("Rest detection found "+(target.priority()>(2*(Main.curFrame.width()*Main.curFrame.height()))?"a face":"skin"));}

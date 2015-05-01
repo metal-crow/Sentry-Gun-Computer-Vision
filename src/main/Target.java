@@ -12,15 +12,15 @@ public class Target {
     private static Pair<int[], Integer> targetdata=Pair.with(new int[]{-1,-1}, 7);//the min priority for the laser;
     private static boolean locked=false;//permissions. User gui can set this, and main thread cannot overwrite
     
-    public void GUIsetTarget(boolean found,Pair<int[], Integer> newtargetdata){
-        foundTarget=found;
+    public synchronized void GUIsetTarget(Pair<int[], Integer> newtargetdata){
+        foundTarget=true;
         targetdata=newtargetdata;
         locked=true;
     }
     
-    public void setTarget(boolean found,Pair<int[], Integer> newtargetdata){
+    public synchronized void setTarget(Pair<int[], Integer> newtargetdata){
         if(!locked){
-            foundTarget=found;
+            foundTarget=true;
             targetdata=newtargetdata;
         }
     }
