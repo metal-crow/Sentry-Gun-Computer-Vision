@@ -24,9 +24,12 @@ public class ArduinoInteraction {
     private static final int TIME_OUT = 1000; // Port open timeout
     private static final int DATA_RATE = 9600; // Arduino serial port
 
-    public ArduinoInteraction() throws UnsupportedCommOperationException, PortInUseException, NoSuchPortException, InterruptedException, IOException {
-    	serialPort = (SerialPort)CommPortIdentifier.getPortIdentifier("COM3").open("", TIME_OUT);
-        
+    public ArduinoInteraction(String[] args) throws UnsupportedCommOperationException, PortInUseException, NoSuchPortException, InterruptedException, IOException {
+        if(args.length>1){
+            serialPort = (SerialPort)CommPortIdentifier.getPortIdentifier(args[1]).open("", TIME_OUT);
+        }else{
+            serialPort = (SerialPort)CommPortIdentifier.getPortIdentifier("COM5").open("", TIME_OUT);
+        }
         // set port parameters
         serialPort.setSerialPortParams(DATA_RATE,
                         SerialPort.DATABITS_8,
@@ -92,7 +95,7 @@ public class ArduinoInteraction {
     }
     
     public static void main(String[] args) throws UnsupportedCommOperationException, PortInUseException, NoSuchPortException, InterruptedException, IOException {
-        ArduinoInteraction a=new ArduinoInteraction();
+        ArduinoInteraction a=new ArduinoInteraction(args);
         a.arduinoScreenPositiontoAngle(new int[]{50,50}, 100,100);
         a.flush();
         a.close();

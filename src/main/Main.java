@@ -56,7 +56,7 @@ public class Main {
             System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         }
         try{
-            arduinoOut=new ArduinoInteraction();
+            arduinoOut=new ArduinoInteraction(args);
         }catch(Exception e){
             System.err.println("Arduino Disabled");
         }
