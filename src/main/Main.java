@@ -49,7 +49,12 @@ public class Main {
     public static int[][] objectPermanence=new int[60][2];
     
     public static void main(String[] args) throws UnsupportedCommOperationException, PortInUseException, NoSuchPortException, InterruptedException, IOException {
-        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+        if(args.length>0){
+            System.load(args[0]);
+        }
+        else{
+            System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+        }
         try{
             arduinoOut=new ArduinoInteraction();
         }catch(Exception e){
